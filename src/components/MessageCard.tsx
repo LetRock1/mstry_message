@@ -21,16 +21,16 @@ import {
 } from "@/components/ui/alert-dialog"
 
 import { Button } from "@/components/ui/button"
-import { X } from "lucide-react"
+import { X, MessageSquareReply } from "lucide-react"
 import { Message } from "@/model/User"
 import { useToast } from "@/hooks/use-toast"
 import { ApiResponse } from "@/types/ApiResponse"
 import axios from "axios"
 
 type MessageCardProps = {
-  message: Message & { _id?: string }
+  message: Message & { _id?: string; conversationId?: string; sender?: string }
   onMessageDelete: (messageId: string) => void
-  onReply: (conversationId: string) => void
+  onReply?: (conversationId: string) => void
 }
 
 const MessageCard = ({ message, onMessageDelete, onReply }: MessageCardProps) => {
@@ -45,7 +45,6 @@ const MessageCard = ({ message, onMessageDelete, onReply }: MessageCardProps) =>
       )
 
       toast({ title: response.data.message })
-
       onMessageDelete(message._id)
     } catch (error: any) {
       toast({
@@ -60,17 +59,26 @@ const MessageCard = ({ message, onMessageDelete, onReply }: MessageCardProps) =>
     ? new Date(message.createdAt).toLocaleString()
     : "No date"
 
-  const isAnonymous = message.sender === "anonymous"
+  // ⚡ FIX: Treat undefined, null, "anonymous", or "guest" as anonymous
+  const isAnonymous =
+    !message.sender ||
+    message.sender === "anonymous" ||
+    message.sender === "guest"
+
+  // A message can only be replied to if it is NOT anonymous AND has a valid conversationId
+  const canReply = !isAnonymous && Boolean(message.conversationId)
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row justify-between items-center">
-        <CardTitle>Message</CardTitle>
+    <Card className="relative">
+      <CardHeader className="flex flex-row justify-between items-center pb-2">
+        <CardTitle className="text-base font-semibold">
+          {isAnonymous ? "Guest Message" : `From: ${message.sender}`}
+        </CardTitle>
 
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="icon">
-              <X className="w-5 h-5" />
+            <Button variant="destructive" size="icon" className="h-8 w-8">
+              <X className="w-4 h-4" />
             </Button>
           </AlertDialogTrigger>
 
@@ -78,7 +86,7 @@ const MessageCard = ({ message, onMessageDelete, onReply }: MessageCardProps) =>
             <AlertDialogHeader>
               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
               <AlertDialogDescription>
-                This will permanently delete the message.
+                This action cannot be undone. This will permanently delete the message.
               </AlertDialogDescription>
             </AlertDialogHeader>
 
@@ -92,24 +100,26 @@ const MessageCard = ({ message, onMessageDelete, onReply }: MessageCardProps) =>
         </AlertDialog>
       </CardHeader>
 
-      <CardContent>
-        <p className="font-medium">
+      <CardContent className="pt-2">
+        <p className="font-medium text-gray-800">
           {message.content || "No message content"}
-        </p>
-
-        <p className="text-xs text-gray-400 mt-1">
-          Sender: {message.sender || "anonymous"}
         </p>
       </CardContent>
 
-      <CardDescription className="px-6 pb-4 text-sm text-gray-500">
-        {formattedDate}
+      <CardDescription className="px-6 pb-4 text-xs text-gray-400">
+        Received: {formattedDate}
       </CardDescription>
 
-      {/* ✅ ONLY SHOW REPLY IF NOT ANONYMOUS */}
-      {!isAnonymous && message.conversationId && (
-        <div className="px-6 pb-4">
-          <Button onClick={() => onReply(message.conversationId!)}>
+      {/* ONLY SHOW REPLY BUTTON IF IT IS A TWO-WAY CONVERSATION */}
+      {canReply && onReply && (
+        <div className="px-6 pb-4 flex justify-end">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onReply(message.conversationId!)}
+            className="flex items-center gap-2"
+          >
+            <MessageSquareReply className="w-4 h-4" />
             Reply
           </Button>
         </div>

@@ -1,31 +1,22 @@
-version: "3.9"
+version: '3.8'
 
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    env_file:
-      - .env
+  # Local MongoDB Container
+  mongodb:
+    image: mongo:latest
+    container_name: mstry_mongodb
     ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      - NEXTAUTH_URL=http://localhost:3000
-      - REDIS_URL=redis://:mysecretpassword@redis:6379
-    command: node server.js
-    depends_on:
-      - redis
-    restart: unless-stopped
-
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    command: redis-server --requirepass mysecretpassword
+      - '27017:27017'
     volumes:
-      - redis-data:/data
-    restart: unless-stopped
+      - mongo_data:/data/db
+
+  # Local Redis Container
+  redis:
+    image: redis:alpine
+    container_name: mstry_redis
+    ports:
+      - '6379:6379'
+    command: redis-server --save 60 1 --loglevel notice
 
 volumes:
-  redis-data:
+  mongo_data:

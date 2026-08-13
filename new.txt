@@ -1,0 +1,5392 @@
+ALL PROJECT FILES SNAPSHOT
+==========================================================================================
+
+PROJECT STRUCTURE
+==========================================================================================
+
+mstrymessage
+│   └── .eslintrc.json
+│   └── components.json
+│   └── docker-compose.yml
+│   └── next-env.d.ts
+│   └── next.config.js
+│   └── package.json
+│   └── postcss.config.js
+│   └── README.md
+│   └── scraping.py
+│   └── server.js
+│   └── socket-server.ts
+│   └── tailwind.config.ts
+│   └── tsconfig.json
+│   ├── emails
+│   │   └── VerificationEmail.tsx
+│   ├── public
+│   ├── src
+│   │   └── messages.json
+│   │   └── middleware.ts
+│   │   ├── app
+│   │   │   └── globals.css
+│   │   │   └── layout.tsx
+│   │   │   ├── (app)
+│   │   │   │   └── layout.tsx
+│   │   │   │   └── page.tsx
+│   │   │   │   ├── dashboard
+│   │   │   │   │   └── page.tsx
+│   │   │   ├── (auth)
+│   │   │   │   ├── signin
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── signup
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── verify
+│   │   │   │   │   ├── [username]
+│   │   │   │   │   │   └── page.tsx
+│   │   │   ├── api
+│   │   │   │   ├── accept-messages
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── auth
+│   │   │   │   │   ├── [...nextauth]
+│   │   │   │   │   │   └── options.ts
+│   │   │   │   │   │   └── route.ts
+│   │   │   │   ├── block
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── check-username-unique
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── delete-message
+│   │   │   │   │   ├── [messageid]
+│   │   │   │   │   │   └── route.ts
+│   │   │   │   ├── get-messages
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── mark-read
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── reply
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── send-message
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── send-mystery
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── signup
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── socket
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── suggest-messages
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── verify-code
+│   │   │   │   │   └── route.ts
+│   │   │   ├── u
+│   │   │   │   ├── [username]
+│   │   │   │   │   └── page.tsx
+│   │   ├── components
+│   │   │   └── MessageCard.tsx
+│   │   │   └── Navbar.tsx
+│   │   │   ├── ui
+│   │   │   │   └── alert-dialog.tsx
+│   │   │   │   └── button.tsx
+│   │   │   │   └── card.tsx
+│   │   │   │   └── carousel.tsx
+│   │   │   │   └── form.tsx
+│   │   │   │   └── input.tsx
+│   │   │   │   └── label.tsx
+│   │   │   │   └── separator.tsx
+│   │   │   │   └── switch.tsx
+│   │   │   │   └── tabs.tsx
+│   │   │   │   └── toast.tsx
+│   │   │   │   └── toaster.tsx
+│   │   ├── context
+│   │   ├── helpers
+│   │   │   └── sendVerificationEmail.tsx
+│   │   ├── hooks
+│   │   │   └── use-toast.ts
+│   │   │   └── useSocket.ts
+│   │   ├── lib
+│   │   │   └── dbConnect.ts
+│   │   │   └── nodemailer.ts
+│   │   │   └── queue.ts
+│   │   │   └── redis.ts
+│   │   │   └── redisHelpers.ts
+│   │   │   └── resend.ts
+│   │   │   └── utils.ts
+│   │   ├── model
+│   │   │   └── Conversation.ts
+│   │   │   └── User.ts
+│   │   ├── providers
+│   │   │   └── ClientProviders.tsx
+│   │   ├── schemas
+│   │   │   └── acceptMessageSchema.ts
+│   │   │   └── messageSchema.ts
+│   │   │   └── signInSchema.ts
+│   │   │   └── signUpSchema.ts
+│   │   │   └── verifySchema.ts
+│   │   ├── types
+│   │   │   └── ApiResponse.ts
+│   │   │   └── next-auth.d.ts
+│   │   ├── workers
+│   │   │   └── emailWorker.ts
+│   │   │   └── guestExpiryWorker.ts
+│   │   │   └── messageWorker.ts
+
+
+PROJECT FILE CONTENTS
+==========================================================================================
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\.eslintrc.json
+==========================================================================================
+
+{
+  "extends": "next/core-web-vitals"
+}
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\components.json
+==========================================================================================
+
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "tailwind.config.ts",
+    "css": "src/app/globals.css",
+    "baseColor": "slate",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "iconLibrary": "lucide",
+  "rtl": false,
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "registries": {}
+}
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\docker-compose.yml
+==========================================================================================
+
+version: '3.8'
+
+services:
+  # Local MongoDB Container
+  mongodb:
+    image: mongo:latest
+    container_name: mstry_mongodb
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+
+  # Local Redis Container
+  redis:
+    image: redis:alpine
+    container_name: mstry_redis
+    ports:
+      - '6379:6379'
+    command: redis-server --save 60 1 --loglevel notice
+
+volumes:
+  mongo_data:
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\next-env.d.ts
+==========================================================================================
+
+/// <reference types="next" />
+/// <reference types="next/image-types/global" />
+
+// NOTE: This file should not be edited
+// see https://nextjs.org/docs/basic-features/typescript for more information.
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\next.config.js
+==========================================================================================
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: false,
+  output: "standalone",
+  experimental: {
+    serverComponentsExternalPackages: ["bullmq", "ioredis"],
+  },
+};
+
+module.exports = nextConfig;
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\package.json
+==========================================================================================
+
+{
+  "name": "mstrymessage",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx server.js",
+    "build": "next build",
+    "start": "NODE_ENV=production tsx server.js",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "@radix-ui/react-alert-dialog": "^1.1.15",
+    "@radix-ui/react-label": "^2.1.8",
+    "@radix-ui/react-separator": "^1.1.8",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-switch": "^1.2.6",
+    "@radix-ui/react-tabs": "^1.1.21",
+    "@radix-ui/react-toast": "^1.2.15",
+    "@react-email/components": "^1.0.6",
+    "@react-email/render": "^2.0.4",
+    "@socket.io/redis-adapter": "^8.3.0",
+    "ai": "^6.0.73",
+    "axios": "^1.13.4",
+    "bcryptjs": "^3.0.3",
+    "bullmq": "^5.81.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cookie": "^2.0.1",
+    "embla-carousel-autoplay": "^8.6.0",
+    "embla-carousel-react": "^8.6.0",
+    "ioredis": "^5.11.1",
+    "lucide-react": "^0.563.0",
+    "mongoose": "^9.1.2",
+    "next": "14.1.3",
+    "next-auth": "^4.24.13",
+    "nodemailer": "^7.0.13",
+    "openai": "^6.18.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-email": "^5.2.1",
+    "react-hook-form": "^7.71.1",
+    "resend": "^6.7.0",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3",
+    "tailwind-merge": "^3.4.0",
+    "usehooks-ts": "^3.1.1",
+    "zo": "^0.0.2",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/cookie": "^0.6.0",
+    "@types/node": "^20",
+    "@types/nodemailer": "^7.0.11",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^9.2.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.1.3",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
+    "tailwindcss-animate": "^1.0.7",
+    "tsx": "^4.23.1",
+    "typescript": "^5"
+  }
+}
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\postcss.config.js
+==========================================================================================
+
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\README.md
+==========================================================================================
+
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+
+## Getting Started
+
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\scraping.py
+==========================================================================================
+
+import os
+import json
+
+ROOT_FOLDER = os.path.dirname(os.path.abspath(__file__))
+OUTPUT_FILE = "new.txt"
+
+# Folders we NEVER want in snapshots
+SKIP_DIRS = {
+    ".git",
+    ".venv", "venv", "env",
+    "__pycache__",
+    "node_modules",
+    ".idea", ".vscode",
+    "dist", "build",
+    "site-packages",
+    ".next", ".nuxt",
+    "coverage", ".pytest_cache"
+    "scraping.py"
+}
+
+# Prevent recursive snapshot growth
+IGNORE_FILES = {
+    "new.txt", "final.txt",
+    "package-lock.json", "yarn.lock", "pnpm-lock.yaml"
+}
+
+# Allowed source file types
+ALLOWED_EXTENSIONS = {
+    ".py",".js",".ts",".jsx",".tsx",
+    ".html",".css",".json",".md",".txt",
+    ".yml",".yaml",".env"
+}
+
+# Skip huge files
+MAX_FILE_SIZE_MB = 2
+MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024
+
+
+def should_skip_path(path: str) -> bool:
+    """Skip if any forbidden directory is in the path."""
+    return any(skip in path.split(os.sep) for skip in SKIP_DIRS)
+
+
+def build_tree(start_path: str) -> str:
+    tree_lines = []
+    for root, dirs, files in os.walk(start_path):
+        if should_skip_path(root):
+            continue
+
+        dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+
+        level = root.replace(start_path, "").count(os.sep)
+        indent = "│   " * level
+        folder_name = os.path.basename(root)
+
+        tree_lines.append(folder_name if level == 0 else f"{indent}├── {folder_name}")
+
+        sub_indent = "│   " * (level + 1)
+        for f in files:
+            if f in IGNORE_FILES:
+                continue
+            if os.path.splitext(f)[1].lower() in ALLOWED_EXTENSIONS:
+                tree_lines.append(f"{sub_indent}└── {f}")
+    return "\n".join(tree_lines)
+
+
+def dump_files(outfile):
+    for root, dirs, files in os.walk(ROOT_FOLDER):
+        if should_skip_path(root):
+            continue
+
+        dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+
+        for file in files:
+            if file in IGNORE_FILES:
+                continue
+            if os.path.splitext(file)[1].lower() not in ALLOWED_EXTENSIONS:
+                continue
+
+            full_path = os.path.join(root, file)
+            if os.path.getsize(full_path) > MAX_FILE_SIZE:
+                continue
+
+            try:
+                with open(full_path, "r", encoding="utf-8", errors="ignore") as f:
+                    content = f.read()
+
+                outfile.write("\n\n")
+                outfile.write("=" * 90 + "\n")
+                outfile.write(f"FILE: {full_path}\n")
+                outfile.write("=" * 90 + "\n\n")
+                outfile.write(content)
+            except Exception as e:
+                outfile.write("\n\n")
+                outfile.write("=" * 90 + "\n")
+                outfile.write(f"FILE: {full_path} (Could not read)\n")
+                outfile.write(f"ERROR: {str(e)}\n")
+                outfile.write("=" * 90 + "\n")
+
+
+def create_snapshot():
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as outfile:
+        outfile.write("ALL PROJECT FILES SNAPSHOT\n")
+        outfile.write("=" * 90 + "\n\n")
+
+        outfile.write("PROJECT STRUCTURE\n")
+        outfile.write("=" * 90 + "\n\n")
+        outfile.write(build_tree(ROOT_FOLDER))
+
+        outfile.write("\n\n\nPROJECT FILE CONTENTS\n")
+        outfile.write("=" * 90 + "\n")
+
+        dump_files(outfile)
+
+    print(f"\n✅ Snapshot created successfully → {OUTPUT_FILE}")
+
+
+if __name__ == "__main__":
+    create_snapshot()
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\server.js
+==========================================================================================
+
+import { createServer } from 'http';
+import { parse } from 'url';
+import next from 'next';
+import { Server } from 'socket.io';
+import { createAdapter } from '@socket.io/redis-adapter';
+import { getToken } from 'next-auth/jwt';
+import parseCookie from 'cookie';
+import { redis } from './src/lib/redis.ts'; // Changed to .ts
+import { initMessageWorker } from './src/workers/messageWorker.ts'; // Added worker import
+
+const dev = process.env.NODE_ENV !== 'production';
+const hostname = 'localhost';
+const port = process.env.PORT || 3000;
+
+const app = next({ dev, hostname, port });
+const handle = app.getRequestHandler();
+
+app.prepare().then(() => {
+  const httpServer = createServer((req, res) => {
+    const parsedUrl = parse(req.url, true);
+    handle(req, res, parsedUrl);
+  });
+
+  const io = new Server(httpServer, {
+    path: '/socket.io',
+    cors: {
+      origin: '*', // Adjust to your domain in production
+      methods: ['GET', 'POST'],
+    },
+  });
+
+  // Attach Redis Adapter for Multi-Server Scaling
+  const pubClient = redis;
+  const subClient = redis.duplicate();
+  io.adapter(createAdapter(pubClient, subClient));
+
+  // --- NextAuth Socket Authentication Middleware ---
+  // Authenticates connected sockets automatically using NextAuth session cookies
+  io.use(async (socket, next) => {
+    try {
+      const rawCookies = socket.handshake.headers.cookie;
+      if (!rawCookies) {
+        return next(new Error('Authentication failed: No session cookies'));
+      }
+
+      const parsedCookies = parseCookie.parse(rawCookies);
+      const tokenKey = process.env.NODE_ENV === 'production'
+        ? '__Secure-next-auth.session-token'
+        : 'next-auth.session-token';
+
+      const token = await getToken({
+        req: { headers: socket.handshake.headers, cookies: parsedCookies },
+        secret: process.env.NEXTAUTH_SECRET,
+      });
+
+      if (!token || !token.username) {
+        return next(new Error('Authentication failed: Invalid token'));
+      }
+
+      // Securely attach verified username to socket instance
+      socket.data.username = token.username;
+      next();
+    } catch (err) {
+      console.error('Socket Auth Error:', err.message);
+      next(new Error('Authentication failed'));
+    }
+  });
+
+  // Socket Connections
+  io.on('connection', (socket) => {
+    const username = socket.data.username;
+    console.log(`Authenticated user connected: ${username}`);
+
+    // Automatically join the user's secure room upon connection
+    socket.join(`user:${username}`);
+
+    socket.on('disconnect', () => {
+      console.log(`User disconnected: ${username}`);
+    });
+  });
+
+  // Make io instance globally available to workers
+  global.io = io;
+
+  // INITIALIZE BULLMQ WORKER HERE!
+  initMessageWorker();
+
+  httpServer.listen(port, () => {
+    console.log(`> Ready on http://${hostname}:${port}`);
+  });
+});
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\socket-server.ts
+==========================================================================================
+
+// socket-server.ts (standalone Socket.io server for local dev)
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+
+const httpServer = createServer();
+const io = new Server(httpServer, {
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+  },
+  path: '/socket.io',
+});
+
+io.on('connection', (socket) => {
+  console.log('New client connected:', socket.id);
+
+  socket.on('join-user-room', (username: string) => {
+    if (username) {
+      socket.join(`user:${username}`);
+      console.log(`User ${username} joined room user:${username}`);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+  });
+});
+
+const PORT = 3001; // Different port from Next.js
+httpServer.listen(PORT, () => {
+  console.log(`Socket.io server running on http://localhost:${PORT}`);
+});
+
+// Export io for potential use in API routes (optional)
+export { io };
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\tailwind.config.ts
+==========================================================================================
+
+import type { Config } from "tailwindcss"
+import tailwindcssAnimate from "tailwindcss-animate"
+
+export default {
+  darkMode: ["class"],
+  content: [
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    // Add any other paths where you use Tailwind classes
+  ],
+  prefix: "",
+  theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
+    extend: {
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        // ... add all other shadcn colors as in my previous message
+        // (secondary, destructive, muted, accent, popover, card, etc.)
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
+    },
+  },
+  plugins: [tailwindcssAnimate],
+} satisfies Config
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\tsconfig.json
+==========================================================================================
+
+{
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "server.js", "src/lib/redis.ts"],
+  "exclude": ["node_modules"]
+}
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\emails\VerificationEmail.tsx
+==========================================================================================
+
+import {
+  Html,
+  Head,
+  Font,
+  Preview,
+  Heading,
+  Row,
+  Section,
+  Text,
+  Button,
+} from "@react-email/components";
+
+interface VerificationEmailProps {
+  username: string;
+  otp: string;
+}
+
+export default function VerificationEmail({
+  username,
+  otp,
+}: VerificationEmailProps) {
+  return (
+    <Html lang="en" dir="ltr">
+      <Head>
+        <title>Verification Code</title>
+
+        <Font
+          fontFamily="Roboto"
+          fallbackFontFamily="Verdana"
+          webFont={{
+            url: "https://fonts.gstatic.com/s/roboto/v27/KFOmCngEu92Fr1Mu4mxKKTU1Kg.woff2",
+            format: "woff2",
+          }}
+          fontWeight={400}
+          fontStyle="normal"
+        />
+      </Head>
+
+      <Preview>Here&apos;s your verification code: {otp}</Preview>
+
+      <Section>
+        <Row>
+          <Heading as="h2">Hello {username},</Heading>
+        </Row>
+
+        <Row>
+          <Text>
+            Thank you for registering. Please use the following verification
+            code to complete your registration:
+          </Text>
+        </Row>
+
+        <Row>
+          <Text
+            style={{
+              fontSize: "24px",
+              fontWeight: "bold",
+              letterSpacing: "2px",
+            }}
+          >
+            {otp}
+          </Text>
+        </Row>
+
+        <Row>
+          <Text>
+            If you did not request this code, please ignore this email.
+          </Text>
+        </Row>
+
+        {/* Optional button */}
+        {/* 
+        <Row>
+          <Button
+            href={`http://localhost:3000/verify/${username}`}
+            style={{
+              backgroundColor: "#61dafb",
+              color: "#000",
+              padding: "12px 20px",
+              borderRadius: "6px",
+              textDecoration: "none",
+            }}
+          >
+            Verify here
+          </Button>
+        </Row>
+        */}
+      </Section>
+    </Html>
+  );
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\messages.json
+==========================================================================================
+
+[
+    {
+"title": "Message from User123",
+"content": "Hey, how are you doing today?",
+"received": "10 minutes ago"
+    },
+    {
+"title": "Message from SecretAdmirer",
+"content": "I really liked your recent post!",
+"received":"2 hours ago"
+    },
+
+    {
+"title": "Message from MysteryGuest",
+"content": "Do you have any book recommendations?",
+"received": "1 day ago"
+    }
+]
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\middleware.ts
+==========================================================================================
+
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { getToken } from 'next-auth/jwt'
+
+export async function middleware(request: NextRequest) {
+  const token = await getToken({ req: request })
+  const { pathname } = request.nextUrl
+
+  // If user is logged in and tries to access auth pages
+  if (
+    token &&
+    (pathname.startsWith('/signin') ||
+      pathname.startsWith('/signup') ||
+      pathname.startsWith('/verify'))
+  ) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
+  // If user is NOT logged in and tries to access protected routes
+  if (
+    !token &&
+    pathname.startsWith('/dashboard')
+  ) {
+    return NextResponse.redirect(new URL('/signin', request.url))
+  }
+
+  // Otherwise allow request
+  return NextResponse.next()
+}
+
+export const config = {
+  matcher: [
+    '/signin',
+    '/signup',
+    '/verify/:path*',
+    '/dashboard/:path*'
+  ]
+}
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\globals.css
+==========================================================================================
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\layout.tsx
+==========================================================================================
+
+import { Toaster } from "@/components/ui/toaster"
+import "./globals.css"
+import ClientProviders from "@/providers/ClientProviders"
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body>
+        <ClientProviders>
+          {children}
+          <Toaster/>
+        </ClientProviders>
+      </body>
+    </html>
+  )
+}
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\(app)\layout.tsx
+==========================================================================================
+
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import Navbar from "@/components/Navbar";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "Create Next App",
+  description: "Generated by create next app",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+        <body className={inter.className}>
+          <Navbar/>
+          {children}
+        </body>
+      
+    </html>
+  );
+}
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\(app)\page.tsx
+==========================================================================================
+
+'use client'
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
+import messages from "@/messages.json"
+import Autoplay from "embla-carousel-autoplay"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { useState, useEffect } from "react"
+
+const Home = () => {
+    const [mounted, setMounted] = useState(false)
+
+useEffect(() => {
+  setMounted(true)
+}, [])
+
+if (!mounted) return null
+
+  return (
+    <>
+      <main className="flex-grow flex flex-col items-center justify-center px-4 md:px-24 py-16">
+
+        <section className="text-center max-w-3xl mb-16">
+          <h1 className="text-4xl md:text-6xl font-extrabold leading-tight">
+            Anonymous Messages. <br />
+            <span className="text-primary">Real Feelings.</span> No Identity.
+          </h1>
+
+          <p className="mt-6 text-lg md:text-xl text-gray-600">
+            Mystery Message lets people send you honest messages without revealing who they are.
+            No profiles. No pressure. Just truth.
+          </p>
+
+          <div className="mt-8 flex gap-4 justify-center">
+            <Link href="/signup">
+              <Button className="px-6 py-5 text-lg">Get Started</Button>
+            </Link>
+            <Link href="/signin">
+              <Button variant="outline" className="px-6 py-5 text-lg">
+                Login
+              </Button>
+            </Link>
+          </div>
+        </section>
+
+        <section className="mb-16 text-center text-gray-500">
+          <p>🔐 Fully anonymous • ⚡ Instant delivery • 🧠 No tracking • 💬 Real conversations</p>
+        </section>
+
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mb-20">
+          {[
+            {
+              title: "Understand yourself",
+              desc: "Take reccomendations from AI and get insights."
+            },
+            {
+              title: "Personal Dashboard",
+              desc: "Manage messages, control who can send, and moderate content."
+            },
+            {
+              title: "Secure System",
+              desc: "Auth, validation, protected APIs, and encrypted data flow."
+            }
+          ].map((f, i) => (
+            <Card key={i}>
+              <CardHeader>
+                <CardTitle>{f.title}</CardTitle>
+              </CardHeader>
+              <CardContent className="text-gray-600">
+                {f.desc}
+              </CardContent>
+            </Card>
+          ))}
+        </section>
+
+        <section className="max-w-4xl text-center mb-20">
+          <h2 className="text-3xl font-bold mb-8">How It Works</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="font-bold mb-2">1. Create Account</h3>
+                <p className="text-gray-600">Sign up and get your unique anonymous link.</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="font-bold mb-2">2. Share Link</h3>
+                <p className="text-gray-600">Share your link anywhere — social media, bio, chat.</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="font-bold mb-2">3. Receive Messages</h3>
+                <p className="text-gray-600">People send you messages anonymously.</p>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        <section className="w-full flex flex-col items-center mb-20">
+          <h2 className="text-3xl font-bold mb-6">Live Anonymous Messages</h2>
+
+          <Carousel
+            plugins={[Autoplay({ delay: 2500 })]}
+            className="w-full max-w-sm"
+          >
+            <CarouselContent>
+              {messages.map((message, index) => (
+                <CarouselItem key={index}>
+                  <div className="p-2">
+                    <Card className="shadow-lg">
+                      <CardHeader>
+                        <CardTitle className="text-center text-lg">
+                          {message.title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="flex items-center justify-center p-6 min-h-[120px]">
+                        <p className="text-center text-gray-700">
+                          {message.content}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
+        </section>
+
+        <section className="text-center max-w-2xl">
+          <h2 className="text-3xl font-bold mb-4">Start Receiving Anonymous Messages</h2>
+          <p className="text-gray-600 mb-6">
+            Create your link and let people speak freely.
+          </p>
+          <Link href="/signup">
+            <Button className="px-8 py-6 text-lg">
+              Create Free Account
+            </Button>
+          </Link>
+        </section>
+
+      </main>
+
+      <footer className="text-center p-6 text-gray-500 text-sm border-t">
+        © 2026 Mstry Message • Built with Next.js • Secure • Anonymous • Open Platform
+      </footer>
+    </>
+  )
+}
+
+export default Home
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\(app)\dashboard\page.tsx
+==========================================================================================
+
+'use client'
+
+import MessageCard from "@/components/MessageCard"
+import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
+import { useToast } from "@/hooks/use-toast"
+import { Message } from "@/model/User"
+import { acceptMessageSchema } from "@/schemas/acceptMessageSchema"
+import { ApiResponse } from "@/types/ApiResponse"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import axios, { AxiosError } from "axios"
+import { Loader2, RefreshCcw, Send, MessageSquare, MessagesSquare, UserCircle2 } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { useCallback, useEffect, useState } from "react"
+import { useForm } from "react-hook-form"
+import { useSocket } from "@/hooks/useSocket"
+
+type SafeMessage = Message & {
+  _id?: string
+  createdAt?: Date | null
+  conversationId?: string
+  sender?: string
+}
+
+type Conversation = {
+  conversationId: string
+  messages: SafeMessage[]
+}
+
+export default function Page() {
+  const [guestMessages, setGuestMessages] = useState<SafeMessage[]>([])
+  const [conversations, setConversations] = useState<Conversation[]>([])
+
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSwitchLoading, setIsSwitchLoading] = useState(false)
+  const [replyText, setReplyText] = useState("")
+  const [activeConv, setActiveConv] = useState<string | null>(null)
+
+  // Mystery send form state
+  const [targetUsername, setTargetUsername] = useState("")
+  const [mysteryContent, setMysteryContent] = useState("")
+  const [isSendingMystery, setIsSendingMystery] = useState(false)
+
+  const { toast } = useToast()
+  const { data: session, update: updateSession } = useSession()
+  const socket = useSocket()
+
+  // --- Real-Time Socket Listener ---
+  useEffect(() => {
+    if (!socket) return
+
+    const handleNewMessage = (newMsg: any) => {
+      const normalized: SafeMessage = {
+        ...newMsg,
+        _id: newMsg._id?.toString() || Date.now().toString(),
+        conversationId: newMsg.conversationId,
+        sender: newMsg.sender || "anonymous",
+        createdAt: newMsg.createdAt ? new Date(newMsg.createdAt) : new Date(),
+      }
+
+      if (!normalized.conversationId) {
+        setGuestMessages(prev => [normalized, ...prev])
+      } else {
+        setConversations(prev => {
+          const index = prev.findIndex(c => c.conversationId === normalized.conversationId)
+          if (index !== -1) {
+            const updated = [...prev]
+            updated[index].messages.push(normalized)
+            return updated
+          }
+          return [...prev, { conversationId: normalized.conversationId!, messages: [normalized] }]
+        })
+      }
+
+      toast({ title: "New Message!", description: "Received in real-time" })
+    }
+
+    socket.on("newMessage", handleNewMessage)
+    return () => {
+      socket.off("newMessage", handleNewMessage)};
+  }, [socket, toast])
+
+  // --- Delete Handler ---
+  const handleDeleteMessage = (messageId: string) => {
+    setGuestMessages(prev => prev.filter(msg => msg._id !== messageId))
+
+    setConversations(prev =>
+      prev
+        .map(conv => ({
+          ...conv,
+          messages: conv.messages.filter(msg => msg._id !== messageId),
+        }))
+        .filter(conv => conv.messages.length > 0)
+    )
+  }
+
+  const handleReplyClick = (conversationId: string) => {
+    setActiveConv(prev => (prev === conversationId ? null : conversationId))
+  }
+
+  // --- Reply to 2-Way Thread ---
+  const sendReply = async (convId: string) => {
+    if (!replyText.trim() || !convId) return
+
+    const optimisticMsg: SafeMessage = {
+      _id: Date.now().toString(),
+      content: replyText,
+      createdAt: new Date(),
+      conversationId: convId,
+      sender: session?.user?.username || "me",
+    }
+
+    setConversations(prev =>
+      prev.map(c =>
+        c.conversationId === convId
+          ? { ...c, messages: [...c.messages, optimisticMsg] }
+          : c
+      )
+    )
+
+    const textToSend = replyText
+    setReplyText("")
+
+    try {
+      const res = await axios.post("/api/reply", {
+        content: textToSend,
+        conversationId: convId,
+      })
+
+      if (res.data.success) {
+        toast({ title: "Reply sent!" })
+      }
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.response?.data?.message || "Failed to send reply",
+        variant: "destructive",
+      })
+    }
+  }
+
+  // --- Send Mystery Message ---
+  const sendMysteryMessage = async () => {
+    if (!targetUsername.trim() || !mysteryContent.trim()) return
+
+    setIsSendingMystery(true)
+
+    try {
+      const res = await axios.post("/api/send-mystery", {
+        recipientUsername: targetUsername,
+        content: mysteryContent,
+      })
+
+      if (res.data.success) {
+        toast({ title: "Sent!", description: "Mystery message delivered" })
+        setTargetUsername("")
+        setMysteryContent("")
+        fetchMessages(true)
+      }
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.response?.data?.message || "Failed to send",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSendingMystery(false)
+    }
+  }
+
+  // --- Form & Switch Sync ---
+  const form = useForm({
+    resolver: zodResolver(acceptMessageSchema),
+    defaultValues: { acceptMessages: false },
+  })
+
+  const { register, watch, setValue } = form
+  const acceptMessages = watch("acceptMessages")
+
+  const fetchAcceptMessage = useCallback(async () => {
+    setIsSwitchLoading(true)
+    try {
+      const res = await axios.get<ApiResponse>("/api/accept-messages")
+      setValue("acceptMessages", res.data.isAcceptingMessages ?? false)
+    } catch (err) {
+      const axiosErr = err as AxiosError<ApiResponse>
+      toast({
+        title: "Error",
+        description: axiosErr.response?.data.message || "Failed to fetch settings",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSwitchLoading(false)
+    }
+  }, [setValue, toast])
+
+  // --- Fetch Messages ---
+  const fetchMessages = useCallback(
+    async (refresh = false) => {
+      setIsLoading(true)
+      try {
+        const res = await axios.get<ApiResponse>("/api/get-messages")
+        const raw = res.data.messages || []
+
+        const normalized: SafeMessage[] = raw.map((m: any) => ({
+          ...m,
+          _id: m._id?.toString(),
+          conversationId: m.conversationId || undefined,
+          sender: m.sender || "anonymous",
+          createdAt: m.createdAt ? new Date(m.createdAt) : null,
+        }))
+
+        const guests = normalized.filter(m => !m.conversationId)
+        const threaded = normalized.filter(m => Boolean(m.conversationId))
+
+        const grouped = threaded.reduce((acc: Record<string, Conversation>, msg) => {
+          const key = msg.conversationId!
+          if (!acc[key]) acc[key] = { conversationId: key, messages: [] }
+          acc[key].messages.push(msg)
+          return acc
+        }, {})
+
+        setGuestMessages(guests)
+        setConversations(Object.values(grouped))
+
+        if (refresh) toast({ title: "Refreshed" })
+      } catch (err) {
+        const axiosErr = err as AxiosError<ApiResponse>
+        toast({
+          title: "Error",
+          description: axiosErr.response?.data.message || "Failed to load messages",
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [toast]
+  )
+
+  useEffect(() => {
+    if (session?.user) {
+      fetchMessages()
+      fetchAcceptMessage()
+    }
+  }, [session, fetchMessages, fetchAcceptMessage])
+
+  const handleSwitchChange = async () => {
+    const nextStatus = !acceptMessages
+    try {
+      const res = await axios.post<ApiResponse>("/api/accept-messages", {
+        acceptMessages: nextStatus,
+      })
+      setValue("acceptMessages", nextStatus)
+      await updateSession({ isAcceptingMessage: nextStatus })
+      toast({ title: res.data.message })
+    } catch (err) {
+      const axiosErr = err as AxiosError<ApiResponse>
+      toast({
+        title: "Error",
+        description: axiosErr.response?.data.message || "Update failed",
+        variant: "destructive",
+      })
+    }
+  }
+
+  if (!session?.user) return <div className="p-8 text-center">Please login</div>
+
+  const username = session.user.username
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : ""
+  const profileUrl = `${baseUrl}/u/${username}`
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(profileUrl)
+    toast({ title: "Copied", description: "Profile link copied to clipboard" })
+  }
+
+  return (
+    <div className="my-8 mx-4 md:mx-8 lg:mx-auto p-6 bg-white rounded-xl w-full max-w-6xl shadow-sm border">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => fetchMessages(true)}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <RefreshCcw className="mr-2 h-4 w-4" />
+          )}
+          Refresh
+        </Button>
+      </div>
+
+      {/* Public Link Card */}
+      <div className="mb-6">
+        <h2 className="text-sm font-medium text-gray-600 mb-2">Your Public Link</h2>
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={profileUrl}
+            readOnly
+            className="flex-1 p-2 border rounded-md bg-gray-50 text-sm text-gray-700"
+          />
+          <Button onClick={copyToClipboard} size="sm">Copy Link</Button>
+        </div>
+      </div>
+
+      {/* Send Mystery Message Container */}
+      <div className="mb-8 p-5 border rounded-lg bg-slate-50/50">
+        <h2 className="text-lg font-semibold mb-1 flex items-center gap-2">
+          <Send className="w-4 h-4 text-blue-600" />
+          Send Mystery Message
+        </h2>
+        <p className="text-xs text-gray-500 mb-3">
+          Start a private 2-way anonymous chat thread with any registered user.
+        </p>
+        <div className="flex flex-col gap-3">
+          <input
+            type="text"
+            placeholder="Recipient's username"
+            value={targetUsername}
+            onChange={e => setTargetUsername(e.target.value.trim())}
+            className="border p-2.5 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <textarea
+            placeholder="Type your secret message..."
+            value={mysteryContent}
+            onChange={e => setMysteryContent(e.target.value)}
+            rows={2}
+            className="border p-2.5 rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <Button
+            onClick={sendMysteryMessage}
+            disabled={isSendingMystery || !targetUsername || !mysteryContent.trim()}
+            className="self-start px-5"
+            size="sm"
+          >
+            {isSendingMystery ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Sending...
+              </>
+            ) : (
+              "Send Message"
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {/* Accept Messages Toggle */}
+      <div className="mb-6 flex items-center gap-3">
+        <Switch
+          {...register("acceptMessages")}
+          checked={acceptMessages}
+          onCheckedChange={handleSwitchChange}
+          disabled={isSwitchLoading}
+        />
+        <span className="font-medium text-sm">
+          Accepting public messages: <strong className={acceptMessages ? "text-green-600" : "text-red-500"}>{acceptMessages ? "Yes" : "No"}</strong>
+        </span>
+      </div>
+
+      <Separator className="my-6" />
+
+      {/* --- TABBED SECTION --- */}
+      <Tabs defaultValue="guest" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsTrigger value="guest" className="flex items-center gap-2">
+            <MessageSquare className="w-4 h-4" />
+            Guest Messages
+            <span className="ml-1 px-2 py-0.5 text-xs bg-gray-200 text-gray-800 rounded-full font-bold">
+              {guestMessages.length}
+            </span>
+          </TabsTrigger>
+
+          <TabsTrigger value="chats" className="flex items-center gap-2">
+            <MessagesSquare className="w-4 h-4 text-blue-600" />
+            2-Way Anonymous Chats
+            <span className="ml-1 px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full font-bold">
+              {conversations.length}
+            </span>
+          </TabsTrigger>
+        </TabsList>
+
+        {/* TAB 1: ONE-WAY GUEST MESSAGES */}
+        <TabsContent value="guest">
+          {guestMessages.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {guestMessages.map(msg => (
+                <MessageCard
+                  key={msg._id}
+                  message={msg}
+                  onMessageDelete={handleDeleteMessage}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 border border-dashed rounded-lg bg-gray-50">
+              <MessageSquare className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm font-medium text-gray-600">No public guest messages yet.</p>
+              <p className="text-xs text-gray-400 mt-1">Share your link to start receiving anonymous messages.</p>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* TAB 2: WHATSAPP-STYLE TWO-WAY ANONYMOUS CHATS */}
+        <TabsContent value="chats">
+          {conversations.length > 0 ? (
+            <div className="space-y-6">
+              {conversations.map(conv => (
+                <div
+                  key={conv.conversationId}
+                  className="border rounded-xl bg-slate-50/50 shadow-sm overflow-hidden"
+                >
+                  {/* WhatsApp-Style Chat Header */}
+                  <div className="bg-slate-100 px-4 py-3 border-b flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      <UserCircle2 className="w-8 h-8 text-blue-600" />
+                      <div>
+                        <h3 className="font-semibold text-sm text-gray-800">
+                          Anonymous Conversation
+                        </h3>
+                        <p className="text-xs text-gray-500 font-mono">
+                          ID: #{conv.conversationId.slice(-8)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-xs text-blue-600 hover:text-blue-700"
+                      onClick={() => handleReplyClick(conv.conversationId)}
+                    >
+                      {activeConv === conv.conversationId ? "Hide Chat Box" : "Open Chat Box"}
+                    </Button>
+                  </div>
+
+                  {/* Message Bubble Feed */}
+                  <div className="p-4 space-y-3 max-h-[400px] overflow-y-auto">
+                    {conv.messages.map(msg => {
+                      const isMe = msg.sender === session?.user?.username || msg.sender === "me"
+                      return (
+                        <div
+                          key={msg._id}
+                          className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}
+                        >
+                          <div
+                            className={`p-3 rounded-2xl max-w-[80%] text-sm shadow-sm ${
+                              isMe
+                                ? "bg-blue-600 text-white rounded-br-none"
+                                : "bg-white text-gray-800 border rounded-bl-none"
+                            }`}
+                          >
+                            <p>{msg.content}</p>
+                            <span
+                              className={`block text-[10px] mt-1 text-right ${
+                                isMe ? "text-blue-200" : "text-gray-400"
+                              }`}
+                            >
+                              {msg.createdAt
+                                ? new Date(msg.createdAt).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })
+                                : "Just now"}
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  {/* Input Footer */}
+                  {activeConv === conv.conversationId && (
+                    <div className="p-3 bg-white border-t flex gap-2">
+                      <input
+                        value={replyText}
+                        onChange={e => setReplyText(e.target.value)}
+                        placeholder="Type an anonymous reply..."
+                        onKeyDown={e => e.key === "Enter" && sendReply(conv.conversationId)}
+                        className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <Button
+                        onClick={() => sendReply(conv.conversationId)}
+                        disabled={!replyText.trim()}
+                        size="sm"
+                      >
+                        Send
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 border border-dashed rounded-lg bg-gray-50">
+              <MessagesSquare className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm font-medium text-gray-600">No active 2-way anonymous chats.</p>
+              <p className="text-xs text-gray-400 mt-1">Send a mystery message above to start a thread.</p>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+    </div>
+  )
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\(auth)\signin\page.tsx
+==========================================================================================
+
+'use client'
+
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
+import Link from "next/link"
+import { useDebounceCallback } from 'usehooks-ts'
+import { useEffect, useState } from "react"
+import { useToast } from "@/hooks/use-toast"
+import { useRouter } from "next/navigation"
+import { signUpSchema } from "@/schemas/signUpSchema"
+import axios, { AxiosError } from 'axios';
+import { ApiResponse } from "@/types/ApiResponse"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Loader2 } from "lucide-react"
+import { signInSchema } from "@/schemas/signInSchema"
+import { signIn } from "next-auth/react"
+
+const Page = () => {
+
+     const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const { toast } = useToast();
+    const router = useRouter();
+
+    const form = useForm<z.infer<typeof signInSchema>>({
+        resolver: zodResolver(signInSchema),
+        defaultValues: {
+            identifier: '',
+            password: ''
+        }
+    })
+
+    const onSubmit = async (data: z.infer<typeof signInSchema>) => {
+const result = await signIn( 'credentials'
+, {
+redirect: false,
+identifier: data.identifier,
+password: data.password
+})
+
+if (result?.error){
+toast ({
+title: "Login Failed",
+description: "Incorrect username or password",
+variant: "destructive"})}
+
+if(result?.url){
+router.replace('/dashboard')
+}
+
+
+}
+
+    return (
+        <div className="flex justify-center items-center min-h-screen bg-gray-100">
+            <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
+                <div className="text-center">
+                    <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
+                        Join Mstry Message
+                    </h1>
+                    <p className="mb-4">Sign in to start your anonymous adventure</p>
+                </div>
+
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+
+                        <FormField
+                        name="identifier"
+                            control={form.control}
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Email/Username</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="email/username"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Password</FormLabel>
+                                    <FormControl>
+                                        <Input type="password"
+                                            placeholder="password"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <Button type="submit" disabled={isSubmitting}>{
+                            isSubmitting ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Please wait
+                                </>)
+                                : ('Go now')}
+                        </Button>
+                    </form>
+                </Form>
+            </div>
+        </div>
+    )
+}
+
+export default Page
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\(auth)\signup\page.tsx
+==========================================================================================
+
+'use client'
+
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
+import Link from "next/link"
+import { useDebounceCallback } from 'usehooks-ts'
+import { useEffect, useState } from "react"
+import { useToast } from "@/hooks/use-toast"
+import { useRouter } from "next/navigation"
+import { signUpSchema } from "@/schemas/signUpSchema"
+import axios, { AxiosError } from 'axios';
+import { ApiResponse } from "@/types/ApiResponse"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Loader2 } from "lucide-react"
+
+const Page = () => {
+
+    const [username, setUsername] = useState('')
+    const [usernameMessage, setUsernameMessage] = useState('')
+    const [isCheckingUsername, setIsCheckingUsername] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const debounced = useDebounceCallback(setUsername, 300)
+
+    const { toast } = useToast();
+    const router = useRouter();
+
+    const form = useForm<z.infer<typeof signUpSchema>>({
+        resolver: zodResolver(signUpSchema),
+        defaultValues: {
+            username: '',
+            email: '',
+            password: ''
+        }
+    })
+
+    useEffect(() => {
+        const checkUsernameUnique = async () => {
+            if (username) {
+                setIsCheckingUsername(true)
+                setUsernameMessage('')
+                try {
+                    const response = await axios.get(`/api/check-username-unique?username=${username}`)
+                    setUsernameMessage(response.data.message)
+                }
+                catch (error) {
+                    const axiosError = error as AxiosError<ApiResponse>;
+                    setUsernameMessage(
+                        axiosError.response?.data.message ?? "Error checking username"
+                    )
+                }
+                finally {
+                    setIsCheckingUsername(false)
+                }
+            }
+        }
+        checkUsernameUnique()
+    }, [username])
+
+    const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
+        setIsSubmitting(true)
+        try {
+            const response = await axios.post<ApiResponse>('/api/signup', data)
+            toast({
+                title: 'Success',
+                description: response.data.message
+            })
+            router.replace(`/verify/${data.username}`)
+        } catch (error) {
+            const axiosError = error as AxiosError<ApiResponse>;
+            toast({
+                title: "Signup failed",
+                description: axiosError.response?.data.message,
+                variant: "destructive"
+            })
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    return (
+        <div className="flex justify-center items-center min-h-screen bg-gray-100">
+            <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
+                <div className="text-center">
+                    <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
+                        Join Mstry Message
+                    </h1>
+                    <p className="mb-4">Sign up to start your anonymous adventure</p>
+                </div>
+
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+
+                        <FormField
+                            control={form.control}
+                            name="username"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Username</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="username"
+                                            {...field}
+                                            onChange={(e) => {
+                                                field.onChange(e)
+                                                debounced(e.target.value)
+                                            }}
+                                        />
+                                    </FormControl>
+                                    {isCheckingUsername && <Loader2 className="animate-spin" />}
+                                    <p className={`text-sm ${usernameMessage === "Username is unique" ? 'text-red-500' : ' text-green-500'}`}>
+                                        {usernameMessage}
+                                    </p>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Email</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="email"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Password</FormLabel>
+                                    <FormControl>
+                                        <Input type="password"
+                                            placeholder="password"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <Button type="submit" disabled={isSubmitting}>{
+                            isSubmitting ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Please wait
+                                </>)
+                                : ('Signup')}
+                        </Button>
+                    </form>
+                </Form>
+                <div className="text-center mt-4">
+                    <p>
+                        Already a member?{' '}
+                        <Link href="/signin" className="™text-blue-600
+hover: text-blue-800">
+                            Sign in
+                        </Link>
+                    </p>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default Page
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\(auth)\verify\[username]\page.tsx
+==========================================================================================
+
+'use client'
+
+import { useToast } from '@/hooks/use-toast'
+import { verifySchema } from '@/schemas/verifySchema'
+import { ApiResponse } from '@/types/ApiResponse'
+import { zodResolver } from '@hookform/resolvers/zod'
+import axios, { AxiosError } from 'axios'
+import { useParams, useRouter } from 'next/navigation'
+import React from 'react'
+import { useForm } from 'react-hook-form'
+import * as z from 'zod'
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+
+const VerifyAccount = () => {
+  const router = useRouter()
+  const params = useParams<{ username: string }>()
+  const { toast } = useToast()
+
+  const form = useForm<z.infer<typeof verifySchema>>({
+    resolver: zodResolver(verifySchema),
+    defaultValues: {
+      code: '',
+    },
+  })
+
+  const onSubmit = async (data: z.infer<typeof verifySchema>) => {
+    try {
+      const response = await axios.post<ApiResponse>(`/api/verify-code`, {
+        username: params.username,
+        code: data.code,
+      })
+
+      toast({
+        title: 'Success',
+        description: response.data.message,
+      })
+
+      router.replace('/signin')
+    } catch (error) {
+      console.error('Error in verification', error)
+
+      const axiosError = error as AxiosError<ApiResponse>
+
+      toast({
+        title: 'Verification failed',
+        description: axiosError.response?.data.message,
+        variant: 'destructive',
+      })
+    }
+  }
+
+  return (
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
+        <div className="text-center">
+          <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
+            Verify Your Account
+          </h1>
+          <p className="mb-4">
+            Enter the verification code sent to your email
+          </p>
+        </div>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+
+            <FormField
+              control={form.control}
+              name="code"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Verification Code</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter code" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit">Submit</Button>
+          </form>
+        </Form>
+      </div>
+    </div>
+  )
+}
+
+export default VerifyAccount
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\api\accept-messages\route.ts
+==========================================================================================
+
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/options";
+import dbConnect from "@/lib/dbConnect";
+import UserModel from "@/model/User";
+import { User } from "next-auth";
+import { redis } from "@/lib/redis"; 
+
+export async function POST(request: Request) {
+  await dbConnect();
+  const session = await getServerSession(authOptions);
+
+  const user: User = session?.user as User;
+
+  if (!session || !session.user) {
+    return Response.json(
+      {
+        success: false,
+        message: "Not Authenticated",
+      },
+      { status: 401 }
+    );
+  }
+
+  const userid = user._id;
+  const { acceptMessages } = await request.json();
+
+  try {
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      userid,
+      { isAcceptingMessage: acceptMessages },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return Response.json(
+        {
+          success: false,
+          message: "Failed to update user status to accept messages",
+        },
+        { status: 404 } // 👈 Fixed status code (was 401)
+      );
+    }
+
+    // ⚡ CRITICAL FIX: Instantly sync Redis RAM cache so /u/[username] and /api/send-message stay in sync
+    await redis.set(
+      `user:${updatedUser.username}:accepting`,
+      acceptMessages ? "true" : "false"
+    );
+
+    return Response.json(
+      {
+        success: true,
+        message: "Message acceptance status updated successfully",
+        isAcceptingMessage: updatedUser.isAcceptingMessage, // Fixed field name
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Failed to update user status to accept messages:", error);
+
+    return Response.json(
+      {
+        success: false,
+        message: "Failed to update user status to accept messages",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(request: Request) {
+  await dbConnect();
+
+  const session = await getServerSession(authOptions);
+  const user: User = session?.user as User;
+
+  if (!session || !session.user) {
+    return Response.json(
+      {
+        success: false,
+        message: "Not Authenticated",
+      },
+      { status: 401 }
+    );
+  }
+
+  const userid = user._id;
+
+  try {
+    const foundUser = await UserModel.findById(userid);
+
+    if (!foundUser) {
+      return Response.json(
+        {
+          success: false,
+          message: "User not found",
+        },
+        { status: 404 }
+      );
+    }
+
+    // ⚡ CRITICAL FIX: Refresh Redis on GET request to keep cache primed
+    await redis.set(
+      `user:${foundUser.username}:accepting`,
+      foundUser.isAcceptingMessage ? "true" : "false"
+    );
+
+    return Response.json(
+      {
+        success: true,
+        isAcceptingMessage: foundUser.isAcceptingMessage, // Fixed key name (removed trailing 's')
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error fetching message acceptance status:", error);
+
+    return Response.json(
+      {
+        success: false,
+        message: "Error getting message acceptance status",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\api\auth\[...nextauth]\options.ts
+==========================================================================================
+
+import { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs"
+import dbConnect from "@/lib/dbConnect";
+import UserModel from "@/model/User";
+
+export const authOptions: NextAuthOptions = {
+    providers: [
+        CredentialsProvider({
+            id: "credentials",
+name: "Credentials",
+            credentials: {
+                email: { label: "Email", type: "text" },
+                password: { label: "Password", type: "password" }
+            },
+
+            async authorize(credentials: any): Promise<any> {
+                await dbConnect()
+                try {
+                    const user = await UserModel.findOne({
+                        $or: [
+                            { email: credentials.identifier },
+                            { username: credentials.identifier }]
+                    })
+
+                    if (!user) {
+                        throw new Error('No user found with this email')
+                    }
+                    if (!user.isVerified) {
+                        throw new Error('Please verify your account before login')
+                    }
+                    const isPasswordCorrect = await bcrypt.
+                        compare(credentials.password, user.password)
+                    if (isPasswordCorrect) {
+                        return user
+                    } else {
+                        throw new Error('Incorrect password')
+                    }
+                } catch (err: any) {
+                    throw new Error(err)
+                }
+            }
+        })
+    ],
+    callbacks: {
+        async jwt({ token, user }) {
+            if (user) {
+                token._id = user._id?.toString()
+                token.isVerified = user.isVerified;
+                token.isAcceptingMessages = user.isAcceptingMessages;
+                token.username = user.username
+            }
+            return token
+        },
+        async session({ session, token }) {
+            if (token) {
+                session.user._id = token._id
+                session.user.isVerified = token.isVerified
+                session.user.isAcceptingMessages = token.
+                    isAcceptingMessages
+                session.user.username = token.username
+            }
+            return session
+        }
+    },
+    pages: {
+        signIn: '/signin'
+    },
+    session: {
+        strategy: "jwt"
+    },
+    secret: process.env.NEXTAUTH_SECRET,
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\api\auth\[...nextauth]\route.ts
+==========================================================================================
+
+import NextAuth from
+"next-auth/next";
+import { authOptions } from "./options";
+
+const handler = NextAuth(authOptions)
+export {handler as GET, handler as POST}  
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\api\block\route.ts
+==========================================================================================
+
+import dbConnect from "@/lib/dbConnect";
+import UserModel from "@/model/User";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/options";
+
+export async function POST(req: Request) {
+  try {
+    await dbConnect();
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.username) {
+      return Response.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
+    const { targetUsername, action } = await req.json(); // action: "block" | "unblock"
+
+    if (!targetUsername || !["block", "unblock"].includes(action)) {
+      return Response.json({ success: false, message: "Invalid payload" }, { status: 400 });
+    }
+
+    const updateQuery =
+      action === "block"
+        ? { $addToSet: { blockedUsers: targetUsername } }
+        : { $pull: { blockedUsers: targetUsername } };
+
+    await UserModel.updateOne(
+      { username: session.user.username },
+      updateQuery
+    );
+
+    return Response.json({
+      success: true,
+      message: `User ${action === "block" ? "blocked" : "unblocked"} successfully`,
+    });
+  } catch (error) {
+    return Response.json({ success: false, message: "Server error" }, { status: 500 });
+  }
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\api\check-username-unique\route.ts
+==========================================================================================
+
+import dbConnect from "@/lib/dbConnect";
+import UserModel from "@/model/User";
+import { z } from "zod"
+import { usernameValidation } from "@/schemas/signUpSchema"
+
+const UsernameQuerySchema = z.object({
+    username: usernameValidation
+})
+
+export async function GET(request: Request) {
+    await dbConnect()
+    try {
+
+        const { searchParams } = new URL(request.url)
+        const queryParam = {
+            username: searchParams.get('username')
+        }
+
+        const result = UsernameQuerySchema.safeParse(queryParam)
+
+        if (!result.success) {
+            const usernameErrors = result.error.format().
+                username?._errors || []
+            return Response.json({
+                success: false,
+                message: usernameErrors?.length > 0
+                    ? usernameErrors.join(', ')
+                    : 'Invalid query parameters',
+            }, { status: 400 })
+        }
+
+
+        const { username } = result.data
+        const existingVerifiedUser = await UserModel.findOne
+            ({ username, isVerified: true })
+        if (existingVerifiedUser) {
+            return Response.json({
+                success: false,
+                message: 'Username is already taken',
+            }, { status: 400 })
+        }
+
+        return Response.json({
+            success: true,
+            message: 'Username available',
+        }, { status: 200 })
+
+
+    }
+
+    catch (error) {
+        console.error("Error checking usernanme", error)
+        return Response.json(
+            {
+                success: false,
+                message: "Error checking username"
+            },
+            { status: 500 })
+    }
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\api\delete-message\[messageid]\route.ts
+==========================================================================================
+
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../auth/[...nextauth]/options";
+import dbConnect from "@/lib/dbConnect";
+import UserModel from "@/model/User";
+import { User } from "next-auth";
+
+export async function DELETE(request: Request, {params}:
+{params: {messageid: string}}){
+
+const messageid = params. messageid
+await dbConnect ( )
+const session = await getServerSession (authOptions)
+const user: User = session?.user as User
+
+
+if (!session || !session.user){
+return Response.json(
+{ 
+success:false,
+message:"Not Auth"
+},
+{ status : 401}
+)
+}
+
+try{
+const updateResult = await UserModel. updateOne(
+{_id: user._id},
+{$pull: {messages: {_id: messageid}}}
+)
+
+if (updateResult.modifiedCount = 0){
+return Response. json({
+success:false,
+message:"Message not found or already delete"},
+{status: 404}
+)
+}
+
+return Response. json({
+success:true,
+message:"Message Deleted"},
+{ status : 200})
+}
+catch (error) {
+return Response. json({
+success:false,
+message:"Error deleting message"},
+{ status :500})
+}
+}
+
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\api\get-messages\route.ts
+==========================================================================================
+
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/options";
+import dbConnect from "@/lib/dbConnect";
+import UserModel from "@/model/User";
+
+export async function GET() {
+  await dbConnect();
+
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.user) {
+    return Response.json(
+      { success: false, message: "Not Authenticated" },
+      { status: 401 }
+    );
+  }
+
+  try {
+    const user = await UserModel.findOne({
+      username: session.user.username,
+    }).lean(); // IMPORTANT
+
+    if (!user) {
+      return Response.json(
+        { success: false, message: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    return Response.json(
+      {
+        success: true,
+        messages: user.messages || [],
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.log("Error:", error);
+
+    return Response.json(
+      { success: false, message: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\api\mark-read\route.ts
+==========================================================================================
+
+import { NextResponse } from "next/server"
+import { redis } from "@/lib/redis"
+import { getServerSession } from "next-auth"
+import { authOptions } from "../auth/[...nextauth]/options"
+
+export async function POST() {
+  const session = await getServerSession(authOptions)
+  if (!session?.user) {
+    return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 })
+  }
+
+  // Use username to match messageWorker.ts
+  const username = session.user.username
+  
+  if (username) {
+    // Delete the exact key incremented by the worker
+    await redis.del(`unread:${username}`)
+  }
+
+  return NextResponse.json({ success: true, message: "Unread counter reset" })
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\api\reply\route.ts
+==========================================================================================
+
+import dbConnect from "@/lib/dbConnect";
+import UserModel from "@/model/User";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/options";
+
+export const dynamic = 'force-dynamic';
+
+export async function POST(req: Request) {
+  try {
+    await dbConnect();
+
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return Response.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
+    const { username: recipientUsername, content, conversationId } = await req.json();
+
+    if (!recipientUsername || !content || !conversationId) {
+      return Response.json({ success: false, message: "Missing fields" }, { status: 400 });
+    }
+
+    const recipient = await UserModel.findOne({ username: recipientUsername });
+    if (!recipient) {
+      return Response.json({ success: false, message: "User not found" }, { status: 404 });
+    }
+
+    // Find all messages in this conversation
+    const convMsgs = recipient.messages.filter((m: any) => m.conversationId === conversationId);
+
+    if (convMsgs.length === 0) {
+      return Response.json({ success: false, message: "Conversation not found" }, { status: 404 });
+    }
+
+    // Get the FIRST message in the conversation (oldest one)
+    // Assuming messages are appended in chronological order
+    const firstMessage = convMsgs[0];
+
+    // Block ONLY if the conversation STARTED with true anonymous
+    const isTrueAnonymousConversation = firstMessage.sender === "anonymous";
+
+    if (isTrueAnonymousConversation) {
+      return Response.json(
+        { success: false, message: "Cannot reply to anonymous messages" },
+        { status: 403 }
+      );
+    }
+
+    // Allowed reply (mystery conversation)
+
+    // Message for recipient (always anonymous)
+    const replyForRecipient = {
+      content,
+      createdAt: new Date(),
+      conversationId,
+      sender: "anonymous"
+    };
+
+    // Message for current user (outgoing reply)
+    const replyForCurrentUser = {
+      content,
+      createdAt: new Date(),
+      conversationId,
+      sender: "me"
+    };
+
+    // Save to recipient
+    recipient.messages.push(replyForRecipient);
+    await recipient.save();
+
+    // Save to current replier (outgoing)
+    const currentUser = await UserModel.findOne({ username: session.user.username });
+    if (currentUser) {
+      currentUser.messages.push(replyForCurrentUser);
+      await currentUser.save();
+    }
+
+    return Response.json({ success: true, message: "Reply sent" });
+  } catch (error) {
+    console.error("Reply error:", error);
+    return Response.json({ success: false, message: "Server error" }, { status: 500 });
+  }
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\api\send-message\route.ts
+==========================================================================================
+
+import { NextRequest } from "next/server";
+import { checkRateLimit, isUserAcceptingMessages } from "@/lib/redisHelpers";
+import { messageQueue } from "@/lib/queue";
+
+export async function POST(request: NextRequest) {
+  try {
+    // 1. Extract IP address & enforce Redis Rate Limiting (5 msgs per 60s per IP)
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0] ||
+      request.headers.get("x-real-ip") ||
+      "127.0.0.1";
+
+    const rateLimit = await checkRateLimit(ip, 5, 60);
+    if (!rateLimit.allowed) {
+      return Response.json(
+        {
+          success: false,
+          message: "Too many requests. Please wait a minute before sending another message.",
+        },
+        { status: 429 }
+      );
+    }
+
+    // 2. Parse payload
+    const { username, content } = await request.json();
+
+    if (!username || !content) {
+      return Response.json(
+        { success: false, message: "Recipient username and content are required" },
+        { status: 400 }
+      );
+    }
+
+    // 3. Fast Acceptance Check via Redis RAM Cache (~1ms, skips MongoDB)
+    const isAccepting = await isUserAcceptingMessages(username);
+    if (!isAccepting) {
+      return Response.json(
+        { success: false, message: "User is currently not accepting messages" },
+        { status: 403 }
+      );
+    }
+
+    // 4. Dispatch job to BullMQ Queue (Asynchronous processing)
+    await messageQueue.add("guest-message", {
+      type: "GUEST_MESSAGE",
+      recipientUsername: username,
+      content,
+      createdAt: new Date(),
+    });
+
+    // 5. Respond instantly (201 Created)
+    return Response.json(
+      { success: true, message: "Message sent successfully" },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Error sending message:", error);
+    return Response.json(
+      { success: false, message: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\api\send-mystery\route.ts
+==========================================================================================
+
+import dbConnect from "@/lib/dbConnect";
+import UserModel from "@/model/User";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/options";
+
+export async function POST(req: Request) {
+  try {
+    await dbConnect();
+    const session = await getServerSession(authOptions);
+    if (!session?.user) return Response.json({ success: false }, { status: 401 });
+
+    const { recipientUsername, content } = await req.json();
+    const conversationId = Date.now().toString();
+
+    const recipient = await UserModel.findOne({ username: recipientUsername });
+    if (!recipient) return Response.json({ success: false, message: "User not found" }, { status: 404 });
+
+    // To recipient: always anonymous
+    recipient.messages.push({
+      content,
+      createdAt: new Date(),
+      conversationId,
+      sender: "anonymous"
+    });
+    await recipient.save();
+
+    // To sender: "me"
+    const senderUser = await UserModel.findOne({ username: session.user.username });
+    if (senderUser) {
+      senderUser.messages.push({
+        content,
+        createdAt: new Date(),
+        conversationId,
+        sender: "me"
+      });
+      await senderUser.save();
+    }
+
+    return Response.json({ success: true, conversationId });
+  } catch (e) {
+    return Response.json({ success: false }, { status: 500 });
+  }
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\api\signup\route.ts
+==========================================================================================
+
+import dbConnect from "@/lib/dbConnect";
+import UserModel from "@/model/User";
+import bcrypt from "bcryptjs";
+import { sendVerificationEmail } from "@/helpers/sendVerificationEmail";
+
+export async function POST(request: Request) {
+  await dbConnect();
+
+  try {
+    const { username, email, password } = await request.json();
+
+    //  Check username (only verified users block it)
+    const existingUserVerifiedByUsername = await UserModel.findOne({
+      username,
+      isVerified: true,
+    });
+
+    if (existingUserVerifiedByUsername) {
+      return Response.json(
+        {
+          success: false,
+          message: "Username is already taken",
+        },
+        { status: 400 }
+      );
+    }
+
+    //  Check email
+    const existingUserByEmail = await UserModel.findOne({ email });
+
+    // Generate OTP
+    const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Email exists
+    if (existingUserByEmail) {
+      if (existingUserByEmail.isVerified) {
+        return Response.json(
+          {
+            success: false,
+            message: "User already exists with this email",
+          },
+          { status: 400 }
+        );
+      }
+
+      // Email exists but NOT verified → update user
+      existingUserByEmail.password = hashedPassword;
+      existingUserByEmail.verifyCode = verifyCode;
+      existingUserByEmail.verifyCodeExpiry = new Date(Date.now() + 3600000);
+
+      await existingUserByEmail.save();
+    } 
+    // Email does NOT exist → create new user
+    else {
+      const newUser = new UserModel({
+        username,
+        email,
+        password: hashedPassword,
+        verifyCode,
+        verifyCodeExpiry: new Date(Date.now() + 3600000),
+        isVerified: false,
+        isAcceptingMessage: true,
+        messages: [],
+      });
+
+      await newUser.save();
+    }
+
+    //  Send verification email
+    const emailResponse = await sendVerificationEmail(
+      email,
+      username,
+      verifyCode
+    );
+
+    if (!emailResponse.success) {
+      return Response.json(
+        {
+          success: false,
+          message: emailResponse.message,
+        },
+        { status: 500 }
+      );
+    }
+
+    // Success
+    return Response.json(
+      {
+        success: true,
+        message: "User registered successfully. Please verify your email",
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Error registering user", error);
+    return Response.json(
+      {
+        success: false,
+        message: "Error registering user",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\api\socket\route.ts
+==========================================================================================
+
+// src/app/api/socket/route.ts
+import { Server } from 'socket.io';
+import { NextRequest, NextResponse } from 'next/server';
+
+// Singleton to hold the io instance
+let io: Server | null = null;
+
+export async function GET(req: NextRequest) {
+  // If already initialized, just return OK
+  if (io) {
+    return NextResponse.json({ status: 'Socket.io already running' });
+  }
+
+  console.log('🚀 Initializing Socket.io server (first request)');
+
+  // Get the underlying HTTP server from Next.js internals
+  // This is safe but not typed — we use any here
+  const httpServer = (global as any).httpServer || (req as any).socket?.server;
+
+  if (!httpServer) {
+    console.error('No HTTP server found - Socket.io cannot initialize');
+    return NextResponse.json(
+      { error: 'Server not ready' },
+      { status: 500 }
+    );
+  }
+
+  io = new Server(httpServer, {
+    path: '/api/socket',
+    addTrailingSlash: false,
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST'],
+    },
+  });
+
+  io.on('connection', (socket) => {
+    console.log('New client connected:', socket.id);
+
+    socket.on('join-user-room', (username: string) => {
+      if (username && typeof username === 'string') {
+        socket.join(`user:${username}`);
+        console.log(`User ${username} joined room user:${username}`);
+      }
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Client disconnected:', socket.id);
+    });
+  });
+
+  // Store io globally so API routes can emit
+  (global as any).io = io;
+
+  return NextResponse.json({ status: 'Socket.io initialized' });
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\api\suggest-messages\route.ts
+==========================================================================================
+
+export const dynamic = 'force-dynamic';
+
+import OpenAI from "openai";
+import { NextResponse } from "next/server";
+
+export async function POST(req: Request) {
+  try {
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY, // no "!" here
+    });
+
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json(
+        { success: false, message: "API key missing" },
+        { status: 500 }
+      );
+    }
+
+    const prompt = `
+Create a list of three open-ended and engaging questions formatted as a single string.
+Each question should be separated by '||'.
+
+These questions are for an anonymous social messaging platform like Qooh.me.
+They should be suitable for a diverse audience.
+Avoid personal or sensitive topics.
+Focus on universal, friendly, and positive themes.
+
+Example format:
+"What's a hobby you've recently started?||If you could have dinner with any historical figure, who would it be?||What's a simple thing that makes you happy?"
+`;
+
+    const completion = await openai.completions.create({
+      model: "gpt-3.5-turbo-instruct",
+      prompt,
+      max_tokens: 300,
+    });
+
+    const text = completion.choices[0].text;
+
+    return NextResponse.json({
+      success: true,
+      data: text,
+    });
+
+  } catch (error: any) {
+    console.error("AI Error:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: "AI generation failed",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\api\verify-code\route.ts
+==========================================================================================
+
+import dbConnect from "@/lib/dbConnect";
+import UserModel from "@/model/User";
+
+export async function POST(request: Request) {
+    await dbConnect()
+    try {
+
+        const { username, code } = await request.json()
+        const decodedUsername = decodeURIComponent(username)
+        const user = await UserModel.findOne({ username: decodedUsername })
+
+        if (!user) {
+            return Response.json({
+                success: false,
+                message: "User not found"
+            },
+                { status: 500 })
+        }
+
+        const isCodeValid = user.verifyCode === code
+        const isCodeNotExpired = new Date(user.verifyCodeExpiry) > new Date()
+
+        if (isCodeValid && isCodeNotExpired) {
+            user.isVerified = true
+            await user.save()
+
+            return Response.json(
+                {
+                    success: true,
+                    message: "Account verified successfully"
+                },
+                { status: 200 })
+
+        }
+        else if (!isCodeNotExpired) {
+            return Response.json({
+                success: false,
+                message: "Verification code has expired,please signup again to get a new code"
+            },
+                { status: 400 }
+            )
+        }
+
+        else {
+            return Response.json({
+                success: false,
+                message: "Incorrect Verification code"
+            },
+                { status: 400 }
+            )
+        }
+
+
+
+    } catch (error) {
+        console.error("Error verifying user", error)
+        return Response.json({
+            success: false,
+            message: "Error verifying user"
+        },
+            { status: 500 }
+        )
+    }
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\u\[username]\page.tsx
+==========================================================================================
+
+"use client";
+
+import { useState } from "react";
+
+type Props = {
+  params: {
+    username: string;
+  };
+};
+
+export default function Page({ params }: Props) {
+  const { username } = params;
+
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+
+  // 🔥 Send message
+  const handleSend = async () => {
+    if (!message) return;
+
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/send-message", {
+        method: "POST",
+        body: JSON.stringify({
+          username,
+          content: message,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Message sent ✅");
+        setMessage("");
+      } else {
+        alert(data.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong");
+    }
+
+    setLoading(false);
+  };
+
+  // 🤖 Get AI suggestions
+  const handleSuggest = async () => {
+    try {
+      const res = await fetch("/api/suggest-messages", {
+        method: "POST",
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        const msgs = data.data.split("||");
+        setSuggestions(msgs);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-6">
+      
+      <h1 className="text-3xl font-bold mb-4">
+        Send Anonymous Message to @{username}
+      </h1>
+
+      {/* Input */}
+      <textarea
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="Write your anonymous message..."
+        className="w-full max-w-xl p-3 border rounded-lg mb-4"
+      />
+
+      {/* Send button */}
+      <button
+        onClick={handleSend}
+        disabled={loading}
+        className="bg-black text-white px-6 py-2 rounded-lg mb-4"
+      >
+        {loading ? "Sending..." : "Send It"}
+      </button>
+
+      {/* Suggest button */}
+      <button
+        onClick={handleSuggest}
+        className="bg-gray-300 px-4 py-2 rounded-lg mb-4"
+      >
+        Suggest Messages
+      </button>
+
+      {/* Suggestions */}
+      <div className="w-full max-w-xl">
+        {suggestions.map((msg, index) => (
+          <div
+            key={index}
+            onClick={() => setMessage(msg)}
+            className="border p-2 rounded mb-2 cursor-pointer hover:bg-gray-100"
+          >
+            {msg}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\components\MessageCard.tsx
+==========================================================================================
+
+'use client'
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogFooter,
+  AlertDialogHeader
+} from "@/components/ui/alert-dialog"
+
+import { Button } from "@/components/ui/button"
+import { X, MessageSquareReply } from "lucide-react"
+import { Message } from "@/model/User"
+import { useToast } from "@/hooks/use-toast"
+import { ApiResponse } from "@/types/ApiResponse"
+import axios from "axios"
+
+type MessageCardProps = {
+  message: Message & { _id?: string; conversationId?: string; sender?: string }
+  onMessageDelete: (messageId: string) => void
+  onReply?: (conversationId: string) => void
+}
+
+const MessageCard = ({ message, onMessageDelete, onReply }: MessageCardProps) => {
+  const { toast } = useToast()
+
+  const handleDeleteConfirm = async () => {
+    try {
+      if (!message._id) return
+
+      const response = await axios.delete<ApiResponse>(
+        `/api/delete-message/${message._id}`
+      )
+
+      toast({ title: response.data.message })
+      onMessageDelete(message._id)
+    } catch (error: any) {
+      toast({
+        title: "Delete Failed",
+        description: error?.response?.data?.message || "Something went wrong",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const formattedDate = message.createdAt
+    ? new Date(message.createdAt).toLocaleString()
+    : "No date"
+
+  // ⚡ FIX: Treat undefined, null, "anonymous", or "guest" as anonymous
+  const isAnonymous =
+    !message.sender ||
+    message.sender === "anonymous" ||
+    message.sender === "guest"
+
+  // A message can only be replied to if it is NOT anonymous AND has a valid conversationId
+  const canReply = !isAnonymous && Boolean(message.conversationId)
+
+  return (
+    <Card className="relative">
+      <CardHeader className="flex flex-row justify-between items-center pb-2">
+        <CardTitle className="text-base font-semibold">
+          {isAnonymous ? "Guest Message" : `From: ${message.sender}`}
+        </CardTitle>
+
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" size="icon" className="h-8 w-8">
+              <X className="w-4 h-4" />
+            </Button>
+          </AlertDialogTrigger>
+
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the message.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteConfirm}>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </CardHeader>
+
+      <CardContent className="pt-2">
+        <p className="font-medium text-gray-800">
+          {message.content || "No message content"}
+        </p>
+      </CardContent>
+
+      <CardDescription className="px-6 pb-4 text-xs text-gray-400">
+        Received: {formattedDate}
+      </CardDescription>
+
+      {/* ONLY SHOW REPLY BUTTON IF IT IS A TWO-WAY CONVERSATION */}
+      {canReply && onReply && (
+        <div className="px-6 pb-4 flex justify-end">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onReply(message.conversationId!)}
+            className="flex items-center gap-2"
+          >
+            <MessageSquareReply className="w-4 h-4" />
+            Reply
+          </Button>
+        </div>
+      )}
+    </Card>
+  )
+}
+
+export default MessageCard
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\components\Navbar.tsx
+==========================================================================================
+
+'use client'
+
+import React from 'react'
+import Link from 'next/link'
+import { useSession, signOut } from 'next-auth/react'
+import { Button } from '@/components/ui/button'
+
+const Navbar = () => {
+  const { data: session } = useSession()
+  const user = session?.user
+
+  return (
+    <nav className="p-4 md:p-6 shadow-md">
+      <div className="container mx-auto flex flex-col md:flex-row justify-between items-center">
+
+        <Link href="/" className="text-xl font-bold mb-4 md:mb-0">
+          Mstry Message
+        </Link>
+
+        {session ? (
+          <>
+            <span className="mr-4">
+              Welcome, {user?.username}
+            </span>
+
+            <Button className="w-full md:w-auto" onClick={() => signOut()}>
+              Logout
+            </Button>
+          </>
+        ) : (
+          <Link href="/signin">
+            <Button className="w-full md:w-auto">Login</Button>
+          </Link>
+        )}
+
+      </div>
+    </nav>
+  )
+}
+
+export default Navbar
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\components\ui\alert-dialog.tsx
+==========================================================================================
+
+"use client"
+
+import * as React from "react"
+import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
+
+import { cn } from "@/lib/utils"
+import { buttonVariants } from "@/components/ui/button"
+
+const AlertDialog = AlertDialogPrimitive.Root
+
+const AlertDialogTrigger = AlertDialogPrimitive.Trigger
+
+const AlertDialogPortal = AlertDialogPrimitive.Portal
+
+const AlertDialogOverlay = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Overlay>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Overlay
+    className={cn(
+      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      className
+    )}
+    {...props}
+    ref={ref}
+  />
+))
+AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName
+
+const AlertDialogContent = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPortal>
+    <AlertDialogOverlay />
+    <AlertDialogPrimitive.Content
+      ref={ref}
+      className={cn(
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+        className
+      )}
+      {...props}
+    />
+  </AlertDialogPortal>
+))
+AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName
+
+const AlertDialogHeader = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col space-y-2 text-center sm:text-left",
+      className
+    )}
+    {...props}
+  />
+)
+AlertDialogHeader.displayName = "AlertDialogHeader"
+
+const AlertDialogFooter = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+      className
+    )}
+    {...props}
+  />
+)
+AlertDialogFooter.displayName = "AlertDialogFooter"
+
+const AlertDialogTitle = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Title>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Title>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Title
+    ref={ref}
+    className={cn("text-lg font-semibold", className)}
+    {...props}
+  />
+))
+AlertDialogTitle.displayName = AlertDialogPrimitive.Title.displayName
+
+const AlertDialogDescription = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Description>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Description>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Description
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+))
+AlertDialogDescription.displayName =
+  AlertDialogPrimitive.Description.displayName
+
+const AlertDialogAction = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Action>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Action
+    ref={ref}
+    className={cn(buttonVariants(), className)}
+    {...props}
+  />
+))
+AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName
+
+const AlertDialogCancel = React.forwardRef<
+  React.ElementRef<typeof AlertDialogPrimitive.Cancel>,
+  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Cancel>
+>(({ className, ...props }, ref) => (
+  <AlertDialogPrimitive.Cancel
+    ref={ref}
+    className={cn(
+      buttonVariants({ variant: "outline" }),
+      "mt-2 sm:mt-0",
+      className
+    )}
+    {...props}
+  />
+))
+AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName
+
+export {
+  AlertDialog,
+  AlertDialogPortal,
+  AlertDialogOverlay,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+}
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\components\ui\button.tsx
+==========================================================================================
+
+import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
+import { cva, type VariantProps } from "class-variance-authority"
+
+import { cn } from "@/lib/utils"
+
+const buttonVariants = cva(
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  {
+    variants: {
+      variant: {
+        default:
+          "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+        destructive:
+          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+        outline:
+          "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+        secondary:
+          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-9 px-4 py-2",
+        sm: "h-8 rounded-md px-3 text-xs",
+        lg: "h-10 rounded-md px-8",
+        icon: "h-9 w-9",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button"
+    return (
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    )
+  }
+)
+Button.displayName = "Button"
+
+export { Button, buttonVariants }
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\components\ui\card.tsx
+==========================================================================================
+
+import * as React from "react"
+
+import { cn } from "@/lib/utils"
+
+const Card = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "rounded-xl border bg-card text-card-foreground shadow",
+      className
+    )}
+    {...props}
+  />
+))
+Card.displayName = "Card"
+
+const CardHeader = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex flex-col space-y-1.5 p-6", className)}
+    {...props}
+  />
+))
+CardHeader.displayName = "CardHeader"
+
+const CardTitle = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("font-semibold leading-none tracking-tight", className)}
+    {...props}
+  />
+))
+CardTitle.displayName = "CardTitle"
+
+const CardDescription = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+))
+CardDescription.displayName = "CardDescription"
+
+const CardContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+))
+CardContent.displayName = "CardContent"
+
+const CardFooter = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex items-center p-6 pt-0", className)}
+    {...props}
+  />
+))
+CardFooter.displayName = "CardFooter"
+
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\components\ui\carousel.tsx
+==========================================================================================
+
+"use client"
+
+import * as React from "react"
+import useEmblaCarousel, {
+  type UseEmblaCarouselType,
+} from "embla-carousel-react"
+import { ArrowLeft, ArrowRight } from "lucide-react"
+
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+
+type CarouselApi = UseEmblaCarouselType[1]
+type UseCarouselParameters = Parameters<typeof useEmblaCarousel>
+type CarouselOptions = UseCarouselParameters[0]
+type CarouselPlugin = UseCarouselParameters[1]
+
+type CarouselProps = {
+  opts?: CarouselOptions
+  plugins?: CarouselPlugin
+  orientation?: "horizontal" | "vertical"
+  setApi?: (api: CarouselApi) => void
+}
+
+type CarouselContextProps = {
+  carouselRef: ReturnType<typeof useEmblaCarousel>[0]
+  api: ReturnType<typeof useEmblaCarousel>[1]
+  scrollPrev: () => void
+  scrollNext: () => void
+  canScrollPrev: boolean
+  canScrollNext: boolean
+} & CarouselProps
+
+const CarouselContext = React.createContext<CarouselContextProps | null>(null)
+
+function useCarousel() {
+  const context = React.useContext(CarouselContext)
+
+  if (!context) {
+    throw new Error("useCarousel must be used within a <Carousel />")
+  }
+
+  return context
+}
+
+const Carousel = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & CarouselProps
+>(
+  (
+    {
+      orientation = "horizontal",
+      opts,
+      setApi,
+      plugins,
+      className,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    const [carouselRef, api] = useEmblaCarousel(
+      {
+        ...opts,
+        axis: orientation === "horizontal" ? "x" : "y",
+      },
+      plugins
+    )
+    const [canScrollPrev, setCanScrollPrev] = React.useState(false)
+    const [canScrollNext, setCanScrollNext] = React.useState(false)
+
+    const onSelect = React.useCallback((api: CarouselApi) => {
+      if (!api) {
+        return
+      }
+
+      setCanScrollPrev(api.canScrollPrev())
+      setCanScrollNext(api.canScrollNext())
+    }, [])
+
+    const scrollPrev = React.useCallback(() => {
+      api?.scrollPrev()
+    }, [api])
+
+    const scrollNext = React.useCallback(() => {
+      api?.scrollNext()
+    }, [api])
+
+    const handleKeyDown = React.useCallback(
+      (event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (event.key === "ArrowLeft") {
+          event.preventDefault()
+          scrollPrev()
+        } else if (event.key === "ArrowRight") {
+          event.preventDefault()
+          scrollNext()
+        }
+      },
+      [scrollPrev, scrollNext]
+    )
+
+    React.useEffect(() => {
+      if (!api || !setApi) {
+        return
+      }
+
+      setApi(api)
+    }, [api, setApi])
+
+    React.useEffect(() => {
+      if (!api) {
+        return
+      }
+
+      onSelect(api)
+      api.on("reInit", onSelect)
+      api.on("select", onSelect)
+
+      return () => {
+        api?.off("select", onSelect)
+      }
+    }, [api, onSelect])
+
+    return (
+      <CarouselContext.Provider
+        value={{
+          carouselRef,
+          api: api,
+          opts,
+          orientation:
+            orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
+          scrollPrev,
+          scrollNext,
+          canScrollPrev,
+          canScrollNext,
+        }}
+      >
+        <div
+          ref={ref}
+          onKeyDownCapture={handleKeyDown}
+          className={cn("relative", className)}
+          role="region"
+          aria-roledescription="carousel"
+          {...props}
+        >
+          {children}
+        </div>
+      </CarouselContext.Provider>
+    )
+  }
+)
+Carousel.displayName = "Carousel"
+
+const CarouselContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => {
+  const { carouselRef, orientation } = useCarousel()
+
+  return (
+    <div ref={carouselRef} className="overflow-hidden">
+      <div
+        ref={ref}
+        className={cn(
+          "flex",
+          orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
+          className
+        )}
+        {...props}
+      />
+    </div>
+  )
+})
+CarouselContent.displayName = "CarouselContent"
+
+const CarouselItem = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => {
+  const { orientation } = useCarousel()
+
+  return (
+    <div
+      ref={ref}
+      role="group"
+      aria-roledescription="slide"
+      className={cn(
+        "min-w-0 shrink-0 grow-0 basis-full",
+        orientation === "horizontal" ? "pl-4" : "pt-4",
+        className
+      )}
+      {...props}
+    />
+  )
+})
+CarouselItem.displayName = "CarouselItem"
+
+const CarouselPrevious = React.forwardRef<
+  HTMLButtonElement,
+  React.ComponentProps<typeof Button>
+>(({ className, variant = "outline", size = "icon", ...props }, ref) => {
+  const { orientation, scrollPrev, canScrollPrev } = useCarousel()
+
+  return (
+    <Button
+      ref={ref}
+      variant={variant}
+      size={size}
+      className={cn(
+        "absolute  h-8 w-8 rounded-full",
+        orientation === "horizontal"
+          ? "-left-12 top-1/2 -translate-y-1/2"
+          : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
+        className
+      )}
+      disabled={!canScrollPrev}
+      onClick={scrollPrev}
+      {...props}
+    >
+      <ArrowLeft className="h-4 w-4" />
+      <span className="sr-only">Previous slide</span>
+    </Button>
+  )
+})
+CarouselPrevious.displayName = "CarouselPrevious"
+
+const CarouselNext = React.forwardRef<
+  HTMLButtonElement,
+  React.ComponentProps<typeof Button>
+>(({ className, variant = "outline", size = "icon", ...props }, ref) => {
+  const { orientation, scrollNext, canScrollNext } = useCarousel()
+
+  return (
+    <Button
+      ref={ref}
+      variant={variant}
+      size={size}
+      className={cn(
+        "absolute h-8 w-8 rounded-full",
+        orientation === "horizontal"
+          ? "-right-12 top-1/2 -translate-y-1/2"
+          : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
+        className
+      )}
+      disabled={!canScrollNext}
+      onClick={scrollNext}
+      {...props}
+    >
+      <ArrowRight className="h-4 w-4" />
+      <span className="sr-only">Next slide</span>
+    </Button>
+  )
+})
+CarouselNext.displayName = "CarouselNext"
+
+export {
+  type CarouselApi,
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+}
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\components\ui\form.tsx
+==========================================================================================
+
+"use client"
+
+import * as React from "react"
+import * as LabelPrimitive from "@radix-ui/react-label"
+import { Slot } from "@radix-ui/react-slot"
+import {
+  Controller,
+  FormProvider,
+  useFormContext,
+  type ControllerProps,
+  type FieldPath,
+  type FieldValues,
+} from "react-hook-form"
+
+import { cn } from "@/lib/utils"
+import { Label } from "@/components/ui/label"
+
+const Form = FormProvider
+
+type FormFieldContextValue<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+> = {
+  name: TName
+}
+
+const FormFieldContext = React.createContext<FormFieldContextValue | null>(null)
+
+const FormField = <
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+>({
+  ...props
+}: ControllerProps<TFieldValues, TName>) => {
+  return (
+    <FormFieldContext.Provider value={{ name: props.name }}>
+      <Controller {...props} />
+    </FormFieldContext.Provider>
+  )
+}
+
+const useFormField = () => {
+  const fieldContext = React.useContext(FormFieldContext)
+  const itemContext = React.useContext(FormItemContext)
+  const { getFieldState, formState } = useFormContext()
+
+  if (!fieldContext) {
+    throw new Error("useFormField should be used within <FormField>")
+  }
+
+  if (!itemContext) {
+    throw new Error("useFormField should be used within <FormItem>")
+  }
+
+  const fieldState = getFieldState(fieldContext.name, formState)
+
+  const { id } = itemContext
+
+  return {
+    id,
+    name: fieldContext.name,
+    formItemId: `${id}-form-item`,
+    formDescriptionId: `${id}-form-item-description`,
+    formMessageId: `${id}-form-item-message`,
+    ...fieldState,
+  }
+}
+
+type FormItemContextValue = {
+  id: string
+}
+
+const FormItemContext = React.createContext<FormItemContextValue | null>(null)
+
+const FormItem = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => {
+  const id = React.useId()
+
+  return (
+    <FormItemContext.Provider value={{ id }}>
+      <div ref={ref} className={cn("space-y-2", className)} {...props} />
+    </FormItemContext.Provider>
+  )
+})
+FormItem.displayName = "FormItem"
+
+const FormLabel = React.forwardRef<
+  React.ElementRef<typeof LabelPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
+>(({ className, ...props }, ref) => {
+  const { error, formItemId } = useFormField()
+
+  return (
+    <Label
+      ref={ref}
+      className={cn(error && "text-destructive", className)}
+      htmlFor={formItemId}
+      {...props}
+    />
+  )
+})
+FormLabel.displayName = "FormLabel"
+
+const FormControl = React.forwardRef<
+  React.ElementRef<typeof Slot>,
+  React.ComponentPropsWithoutRef<typeof Slot>
+>(({ ...props }, ref) => {
+  const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
+
+  return (
+    <Slot
+      ref={ref}
+      id={formItemId}
+      aria-describedby={
+        !error
+          ? `${formDescriptionId}`
+          : `${formDescriptionId} ${formMessageId}`
+      }
+      aria-invalid={!!error}
+      {...props}
+    />
+  )
+})
+FormControl.displayName = "FormControl"
+
+const FormDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => {
+  const { formDescriptionId } = useFormField()
+
+  return (
+    <p
+      ref={ref}
+      id={formDescriptionId}
+      className={cn("text-[0.8rem] text-muted-foreground", className)}
+      {...props}
+    />
+  )
+})
+FormDescription.displayName = "FormDescription"
+
+const FormMessage = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, children, ...props }, ref) => {
+  const { error, formMessageId } = useFormField()
+  const body = error ? String(error?.message ?? "") : children
+
+  if (!body) {
+    return null
+  }
+
+  return (
+    <p
+      ref={ref}
+      id={formMessageId}
+      className={cn("text-[0.8rem] font-medium text-destructive", className)}
+      {...props}
+    >
+      {body}
+    </p>
+  )
+})
+FormMessage.displayName = "FormMessage"
+
+export {
+  useFormField,
+  Form,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+  FormField,
+}
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\components\ui\input.tsx
+==========================================================================================
+
+import * as React from "react"
+
+import { cn } from "@/lib/utils"
+
+const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
+  ({ className, type, ...props }, ref) => {
+    return (
+      <input
+        type={type}
+        className={cn(
+          "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+          className
+        )}
+        ref={ref}
+        {...props}
+      />
+    )
+  }
+)
+Input.displayName = "Input"
+
+export { Input }
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\components\ui\label.tsx
+==========================================================================================
+
+"use client"
+
+import * as React from "react"
+import * as LabelPrimitive from "@radix-ui/react-label"
+import { cva, type VariantProps } from "class-variance-authority"
+
+import { cn } from "@/lib/utils"
+
+const labelVariants = cva(
+  "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+)
+
+const Label = React.forwardRef<
+  React.ElementRef<typeof LabelPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> &
+    VariantProps<typeof labelVariants>
+>(({ className, ...props }, ref) => (
+  <LabelPrimitive.Root
+    ref={ref}
+    className={cn(labelVariants(), className)}
+    {...props}
+  />
+))
+Label.displayName = LabelPrimitive.Root.displayName
+
+export { Label }
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\components\ui\separator.tsx
+==========================================================================================
+
+"use client"
+
+import * as React from "react"
+import * as SeparatorPrimitive from "@radix-ui/react-separator"
+
+import { cn } from "@/lib/utils"
+
+const Separator = React.forwardRef<
+  React.ElementRef<typeof SeparatorPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>
+>(
+  (
+    { className, orientation = "horizontal", decorative = true, ...props },
+    ref
+  ) => (
+    <SeparatorPrimitive.Root
+      ref={ref}
+      decorative={decorative}
+      orientation={orientation}
+      className={cn(
+        "shrink-0 bg-border",
+        orientation === "horizontal" ? "h-[1px] w-full" : "h-full w-[1px]",
+        className
+      )}
+      {...props}
+    />
+  )
+)
+Separator.displayName = SeparatorPrimitive.Root.displayName
+
+export { Separator }
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\components\ui\switch.tsx
+==========================================================================================
+
+"use client"
+
+import * as React from "react"
+import * as SwitchPrimitives from "@radix-ui/react-switch"
+
+import { cn } from "@/lib/utils"
+
+const Switch = React.forwardRef<
+  React.ElementRef<typeof SwitchPrimitives.Root>,
+  React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
+>(({ className, ...props }, ref) => (
+  <SwitchPrimitives.Root
+    className={cn(
+      "peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
+      className
+    )}
+    {...props}
+    ref={ref}
+  >
+    <SwitchPrimitives.Thumb
+      className={cn(
+        "pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0"
+      )}
+    />
+  </SwitchPrimitives.Root>
+))
+Switch.displayName = SwitchPrimitives.Root.displayName
+
+export { Switch }
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\components\ui\tabs.tsx
+==========================================================================================
+
+"use client"
+
+import * as React from "react"
+import * as TabsPrimitive from "@radix-ui/react-tabs"
+
+import { cn } from "@/lib/utils"
+
+const Tabs = TabsPrimitive.Root
+
+const TabsList = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.List>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.List
+    ref={ref}
+    className={cn(
+      "inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground",
+      className
+    )}
+    {...props}
+  />
+))
+TabsList.displayName = TabsPrimitive.List.displayName
+
+const TabsTrigger = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.Trigger
+    ref={ref}
+    className={cn(
+      "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow",
+      className
+    )}
+    {...props}
+  />
+))
+TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
+
+const TabsContent = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.Content
+    ref={ref}
+    className={cn(
+      "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      className
+    )}
+    {...props}
+  />
+))
+TabsContent.displayName = TabsPrimitive.Content.displayName
+
+export { Tabs, TabsList, TabsTrigger, TabsContent }
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\components\ui\toast.tsx
+==========================================================================================
+
+"use client"
+
+import * as React from "react"
+import * as ToastPrimitives from "@radix-ui/react-toast"
+import { cva, type VariantProps } from "class-variance-authority"
+import { X } from "lucide-react"
+
+import { cn } from "@/lib/utils"
+
+const ToastProvider = ToastPrimitives.Provider
+
+const ToastViewport = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Viewport>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Viewport>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitives.Viewport
+    ref={ref}
+    className={cn(
+      "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
+      className
+    )}
+    {...props}
+  />
+))
+ToastViewport.displayName = ToastPrimitives.Viewport.displayName
+
+const toastVariants = cva(
+  "group pointer-events-auto relative flex w-full items-center justify-between space-x-2 overflow-hidden rounded-md border p-4 pr-6 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full",
+  {
+    variants: {
+      variant: {
+        default: "border bg-background text-foreground",
+        destructive:
+          "destructive group border-destructive bg-destructive text-destructive-foreground",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+const Toast = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Root>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
+    VariantProps<typeof toastVariants>
+>(({ className, variant, ...props }, ref) => {
+  return (
+    <ToastPrimitives.Root
+      ref={ref}
+      className={cn(toastVariants({ variant }), className)}
+      {...props}
+    />
+  )
+})
+Toast.displayName = ToastPrimitives.Root.displayName
+
+const ToastAction = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Action>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Action>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitives.Action
+    ref={ref}
+    className={cn(
+      "inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium transition-colors hover:bg-secondary focus:outline-none focus:ring-1 focus:ring-ring disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive",
+      className
+    )}
+    {...props}
+  />
+))
+ToastAction.displayName = ToastPrimitives.Action.displayName
+
+const ToastClose = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Close>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Close>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitives.Close
+    ref={ref}
+    className={cn(
+      "absolute right-1 top-1 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-1 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600",
+      className
+    )}
+    toast-close=""
+    {...props}
+  >
+    <X className="h-4 w-4" />
+  </ToastPrimitives.Close>
+))
+ToastClose.displayName = ToastPrimitives.Close.displayName
+
+const ToastTitle = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Title>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Title>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitives.Title
+    ref={ref}
+    className={cn("text-sm font-semibold [&+div]:text-xs", className)}
+    {...props}
+  />
+))
+ToastTitle.displayName = ToastPrimitives.Title.displayName
+
+const ToastDescription = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Description>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Description>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitives.Description
+    ref={ref}
+    className={cn("text-sm opacity-90", className)}
+    {...props}
+  />
+))
+ToastDescription.displayName = ToastPrimitives.Description.displayName
+
+type ToastProps = React.ComponentPropsWithoutRef<typeof Toast>
+
+type ToastActionElement = React.ReactElement<typeof ToastAction>
+
+export {
+  type ToastProps,
+  type ToastActionElement,
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+  ToastAction,
+}
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\components\ui\toaster.tsx
+==========================================================================================
+
+"use client"
+
+import * as React from "react"
+import { useToast } from "@/hooks/use-toast"
+import {
+  Toast,
+  ToastClose,
+  ToastDescription,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
+} from "@/components/ui/toast"
+
+export function Toaster() {
+  const [mounted, setMounted] = React.useState(false)
+  const { toasts } = useToast()
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
+
+  return (
+    <ToastProvider>
+      {toasts.map(({ id, title, description, action, ...props }) => (
+        <Toast key={id} {...props}>
+          <div className="grid gap-1">
+            {title && <ToastTitle>{title}</ToastTitle>}
+            {description && (
+              <ToastDescription>{description}</ToastDescription>
+            )}
+          </div>
+          {action}
+          <ToastClose />
+        </Toast>
+      ))}
+      <ToastViewport />
+    </ToastProvider>
+  )
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\helpers\sendVerificationEmail.tsx
+==========================================================================================
+
+import nodemailer from "nodemailer"
+import { render } from "@react-email/render"
+import VerificationEmail from "../../emails/VerificationEmail"
+import { ApiResponse } from "@/types/ApiResponse"
+
+export async function sendVerificationEmail(
+  email: string,
+  username: string,
+  verifyCode: string
+): Promise<ApiResponse> {
+  try {
+    
+    const emailHtml: string = await render(
+      <VerificationEmail username={username} otp={verifyCode} />
+    )
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
+      },
+    })
+
+    await transporter.sendMail({
+      from: `"Mystery Message" <${process.env.GMAIL_USER}>`,
+      to: email,
+      subject: "Mystery Message | Verification code",
+      html: emailHtml, 
+    })
+
+    return { success: true, message: "Verification email sent successfully" }
+  } catch (error) {
+    console.error("Email error:", error)
+    return { success: false, message: "Failed to send verification email" }
+  }
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\hooks\use-toast.ts
+==========================================================================================
+
+"use client"
+
+// Inspired by react-hot-toast library
+import * as React from "react"
+
+import type {
+  ToastActionElement,
+  ToastProps,
+} from "@/components/ui/toast"
+
+const TOAST_LIMIT = 1
+const TOAST_REMOVE_DELAY = 1000000
+
+type ToasterToast = ToastProps & {
+  id: string
+  title?: React.ReactNode
+  description?: React.ReactNode
+  action?: ToastActionElement
+}
+
+const actionTypes = {
+  ADD_TOAST: "ADD_TOAST",
+  UPDATE_TOAST: "UPDATE_TOAST",
+  DISMISS_TOAST: "DISMISS_TOAST",
+  REMOVE_TOAST: "REMOVE_TOAST",
+} as const
+
+let count = 0
+
+function genId() {
+  count = (count + 1) % Number.MAX_SAFE_INTEGER
+  return count.toString()
+}
+
+type ActionType = typeof actionTypes
+
+type Action =
+  | {
+      type: ActionType["ADD_TOAST"]
+      toast: ToasterToast
+    }
+  | {
+      type: ActionType["UPDATE_TOAST"]
+      toast: Partial<ToasterToast>
+    }
+  | {
+      type: ActionType["DISMISS_TOAST"]
+      toastId?: ToasterToast["id"]
+    }
+  | {
+      type: ActionType["REMOVE_TOAST"]
+      toastId?: ToasterToast["id"]
+    }
+
+interface State {
+  toasts: ToasterToast[]
+}
+
+const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
+
+const addToRemoveQueue = (toastId: string) => {
+  if (toastTimeouts.has(toastId)) {
+    return
+  }
+
+  const timeout = setTimeout(() => {
+    toastTimeouts.delete(toastId)
+    dispatch({
+      type: "REMOVE_TOAST",
+      toastId: toastId,
+    })
+  }, TOAST_REMOVE_DELAY)
+
+  toastTimeouts.set(toastId, timeout)
+}
+
+export const reducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case "ADD_TOAST":
+      return {
+        ...state,
+        toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
+      }
+
+    case "UPDATE_TOAST":
+      return {
+        ...state,
+        toasts: state.toasts.map((t) =>
+          t.id === action.toast.id ? { ...t, ...action.toast } : t
+        ),
+      }
+
+    case "DISMISS_TOAST": {
+      const { toastId } = action
+
+      // ! Side effects ! - This could be extracted into a dismissToast() action,
+      // but I'll keep it here for simplicity
+      if (toastId) {
+        addToRemoveQueue(toastId)
+      } else {
+        state.toasts.forEach((toast) => {
+          addToRemoveQueue(toast.id)
+        })
+      }
+
+      return {
+        ...state,
+        toasts: state.toasts.map((t) =>
+          t.id === toastId || toastId === undefined
+            ? {
+                ...t,
+                open: false,
+              }
+            : t
+        ),
+      }
+    }
+    case "REMOVE_TOAST":
+      if (action.toastId === undefined) {
+        return {
+          ...state,
+          toasts: [],
+        }
+      }
+      return {
+        ...state,
+        toasts: state.toasts.filter((t) => t.id !== action.toastId),
+      }
+  }
+}
+
+const listeners: Array<(state: State) => void> = []
+
+let memoryState: State = { toasts: [] }
+
+function dispatch(action: Action) {
+  memoryState = reducer(memoryState, action)
+  listeners.forEach((listener) => {
+    listener(memoryState)
+  })
+}
+
+type Toast = Omit<ToasterToast, "id">
+
+function toast({ ...props }: Toast) {
+  const id = genId()
+
+  const update = (props: ToasterToast) =>
+    dispatch({
+      type: "UPDATE_TOAST",
+      toast: { ...props, id },
+    })
+  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
+
+  dispatch({
+    type: "ADD_TOAST",
+    toast: {
+      ...props,
+      id,
+      open: true,
+      onOpenChange: (open) => {
+        if (!open) dismiss()
+      },
+    },
+  })
+
+  return {
+    id: id,
+    dismiss,
+    update,
+  }
+}
+
+function useToast() {
+  const [state, setState] = React.useState<State>(memoryState)
+
+  React.useEffect(() => {
+    listeners.push(setState)
+    return () => {
+      const index = listeners.indexOf(setState)
+      if (index > -1) {
+        listeners.splice(index, 1)
+      }
+    }
+  }, [state])
+
+  return {
+    ...state,
+    toast,
+    dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
+  }
+}
+
+export { useToast, toast }
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\hooks\useSocket.ts
+==========================================================================================
+
+'use client';
+
+import { useEffect, useRef } from 'react';
+import { io, Socket } from 'socket.io-client';
+import { useSession } from 'next-auth/react';
+
+export function useSocket() {
+  const { data: session } = useSession();
+  const socketRef = useRef<Socket | null>(null);
+
+  useEffect(() => {
+    if (!session?.user?.username || socketRef.current) return;
+
+    // Connect to standalone Socket.io server
+    const socket = io('http://localhost:3001', {
+      path: '/socket.io',
+      autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+    });
+
+    socketRef.current = socket;
+
+    socket.on('connect', () => {
+      console.log('✅ Connected to Socket.io server');
+      socket.emit('join-user-room', session.user.username);
+    });
+
+    socket.on('connect_error', (err) => {
+      console.error('Socket connection error:', err.message);
+    });
+
+    return () => {
+      socket.disconnect();
+      socketRef.current = null;
+    };
+  }, [session?.user?.username]);
+
+  return socketRef.current;
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\lib\dbConnect.ts
+==========================================================================================
+
+import mongoose from "mongoose";
+
+type ConnectionObject = {
+isConnected?: number
+}
+
+const connection: ConnectionObject = {}
+
+async function dbConnect(): Promise<void> {
+if (connection.isConnected) {
+console. log("Already connected to database");
+return
+}
+
+try {
+const db = await mongoose.connect(process.env.MONGODB_URI ||"",{})
+
+connection.isConnected = db.connections[0].readyState
+console.log("Database connection success")
+}
+catch(error){
+console.log("db connectio failed",error)
+process.exit(1)
+}
+}
+
+export default dbConnect;
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\lib\nodemailer.ts
+==========================================================================================
+
+import nodemailer from "nodemailer"
+
+export const gmailTransporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.GMAIL_USER,        // e.g., yourname@gmail.com
+    pass: process.env.GMAIL_APP_PASSWORD, // 16-character Google App Password
+  },
+})
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\lib\queue.ts
+==========================================================================================
+
+import { Queue } from "bullmq";
+import { redisConnection } from "./redis";
+
+// 1. Primary queue for processing incoming guest & chat messages
+export const messageQueue = new Queue("message-processing", {
+  connection: redisConnection,
+  defaultJobOptions: {
+    removeOnComplete: true,
+    removeOnFail: 100,
+  },
+});
+
+// 2. Queue for 24-hour guest message auto-deletion
+export const guestExpiryQueue = new Queue("guest-expiry-queue", {
+  connection: redisConnection,
+  defaultJobOptions: {
+    removeOnComplete: true,
+    removeOnFail: 100,
+  },
+});
+
+// 3. Queue for unread digest email notifications via Gmail
+export const emailQueue = new Queue("email-notification-queue", {
+  connection: redisConnection,
+  defaultJobOptions: {
+    attempts: 3,
+    backoff: {
+      type: "exponential",
+      delay: 5000,
+    },
+    removeOnComplete: true,
+  },
+});
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\lib\redis.ts
+==========================================================================================
+
+import Redis from "ioredis"
+
+const redisUrl = process.env.REDIS_URL || "redis://127.0.0.1:6379"
+
+export const redisConnection = new Redis(redisUrl, {
+  maxRetriesPerRequest: null, // Required by BullMQ
+  enableReadyCheck: false,
+})
+
+export const redis = new Redis(redisUrl)
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\lib\redisHelpers.ts
+==========================================================================================
+
+import { redis } from './redis';
+import UserModel from '@/model/User';
+import dbConnect from './dbConnect';
+
+// IP Rate Limiter (Max 5 requests per 60 seconds)
+export async function checkRateLimit(ip: string, limit = 5, windowInSeconds = 60) {
+  const key = `ratelimit:${ip}`;
+  const currentRequests = await redis.incr(key);
+
+  if (currentRequests === 1) {
+    await redis.expire(key, windowInSeconds);
+  }
+
+  if (currentRequests > limit) {
+    return { allowed: false, remaining: 0 };
+  }
+
+  return { allowed: true, remaining: limit - currentRequests };
+}
+
+// Check if user is accepting messages (Cache Hit: ~1ms)
+export async function isUserAcceptingMessages(username: string): Promise<boolean> {
+  const cacheKey = `user:${username}:accepting`;
+  const cachedStatus = await redis.get(cacheKey);
+
+  if (cachedStatus !== null) {
+    return cachedStatus === 'true';
+  }
+
+  // Cache Miss: Query MongoDB once and cache for 1 hour
+  await dbConnect();
+  const user = await UserModel.findOne({ username }).select('isAcceptingMessage').lean();
+  
+  if (!user) return false;
+
+  const status = user.isAcceptingMessage ? 'true' : 'false';
+  await redis.set(cacheKey, status, 'EX', 3600);
+  return user.isAcceptingMessage;
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\lib\resend.ts
+==========================================================================================
+
+import { Resend } from 'resend' ;
+export const resend = new Resend (process.env.RESEND_API_KEY);
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\lib\utils.ts
+==========================================================================================
+
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\model\Conversation.ts
+==========================================================================================
+
+import mongoose, { Schema, Document } from 'mongoose';
+
+export interface ThreadMessage {
+  senderUsername: string;
+  senderAlias: string;
+  content: string;
+  createdAt: Date;
+}
+
+export interface Conversation extends Document {
+  participants: string[];
+  messages: ThreadMessage[];
+  updatedAt: Date;
+}
+
+const ThreadMessageSchema: Schema<ThreadMessage> = new Schema({
+  senderUsername: { type: String, required: true },
+  senderAlias: { type: String, required: true },
+  content: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+});
+
+const ConversationSchema: Schema<Conversation> = new Schema({
+  participants: [{ type: String, required: true }],
+  messages: [ThreadMessageSchema],
+  updatedAt: { type: Date, default: Date.now },
+});
+
+ConversationSchema.index({ participants: 1 });
+
+const ConversationModel =
+  (mongoose.models.Conversation as mongoose.Model<Conversation>) ||
+  mongoose.model<Conversation>('Conversation', ConversationSchema);
+
+export default ConversationModel;
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\model\User.ts
+==========================================================================================
+
+import mongoose, { Schema, Document } from "mongoose";
+
+export interface Message {
+  _id?: string;
+  content: string;
+  createdAt?: Date;
+  conversationId?: string; // Optional for unidirectional guest messages
+  sender: string;
+}
+
+const MessageSchema: Schema = new Schema({
+  content: {
+    type: String,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  conversationId: {
+    type: String,
+    required: false, // Optional for direct inbox messages
+  },
+  sender: {
+    type: String, // "guest" or sender's username
+    default: "guest",
+    required: true,
+  },
+});
+
+export interface User extends Document {
+  username: string;
+  email: string;
+  password: string;
+  verifyCode: string;
+  verifyCodeExpiry: Date;
+  isVerified: boolean;
+  isAcceptingMessage: boolean;
+  messages: Message[];
+}
+
+const UserSchema: Schema<User> = new Schema({
+  username: {
+    type: String,
+    required: [true, "Username is required"],
+    trim: true,
+    unique: true,
+  },
+  email: {
+    type: String,
+    required: [true, "Email is required"], // Fixed validation message
+    unique: true,
+    match: [/.+\@.+\..+/, "Please use a valid email address"],
+  },
+  password: {
+    type: String,
+    required: [true, "Password is required"],
+  },
+  verifyCode: {
+    type: String,
+    required: [true, "Verify code is required"],
+  },
+  verifyCodeExpiry: {
+    type: Date,
+    required: [true, "Verify code expiry is required"], // Fixed validation message
+  },
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
+  isAcceptingMessage: {
+    type: Boolean,
+    default: true,
+  },
+  messages: [MessageSchema],
+});
+
+const UserModel =
+  (mongoose.models.User as mongoose.Model<User>) ||
+  mongoose.model<User>("User", UserSchema);
+
+export default UserModel;
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\providers\ClientProviders.tsx
+==========================================================================================
+
+"use client"
+
+import { SessionProvider } from "next-auth/react"
+
+export default function ClientProviders({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return <SessionProvider>{children}</SessionProvider>
+}
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\schemas\acceptMessageSchema.ts
+==========================================================================================
+
+import {z} from
+"zod"
+export const acceptMessageSchema = z.object({
+acceptMessages: z.boolean(),
+})
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\schemas\messageSchema.ts
+==========================================================================================
+
+import {z}
+from
+"zod"
+
+export const messageSchema = z. object({
+content: z.string()
+.min(10, {message: 'Content must be at least of 10 characters'})
+.max(300, {message:'Content must be no longer than 300 characters'})
+
+})
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\schemas\signInSchema.ts
+==========================================================================================
+
+import {z} from "zod"
+
+export const signInSchema = z.object({
+identifier: z.string(),
+password: z.string(),
+})
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\schemas\signUpSchema.ts
+==========================================================================================
+
+import {z} from 'zod'
+
+export const usernameValidation = z.string ()
+.min(2, "Username must be atleast 2 characters")
+.max(20, "Username must be no more than 20 characters")
+.regex(/^[a-zA-Z0-9_]+$/, "Username must not contain special character")
+
+export const signUpSchema = z. object({
+username: usernameValidation,
+email: z.string().email({message:
+'Invalid email address'}),
+password: z.string().min(6, {message: "password must be at least 6 characters"})
+})
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\schemas\verifySchema.ts
+==========================================================================================
+
+import {z} from "zod"
+
+export const verifySchema = z.object({
+code: z.string().length(6, 'Verification code must be 6 digits')
+})
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\types\ApiResponse.ts
+==========================================================================================
+
+import { Message } from "@/model/User";
+
+export interface ApiResponse {
+  success: boolean;
+  message: string;
+  isAcceptingMessages?: boolean;
+  messages?: Message[];
+}
+
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\types\next-auth.d.ts
+==========================================================================================
+
+import 'next-auth';
+
+declare module 'next-auth'{
+
+interface User{
+_id?: string;
+isVerified?: boolean;
+isAcceptingMessages?: boolean;
+username?: string}
+
+interface Session{
+user:{
+_id?: string;
+isVerified?: boolean;
+isAcceptingMessages?:boolean;
+username?: string}
+&
+DefaultSession['user']
+}
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\workers\emailWorker.ts
+==========================================================================================
+
+import { Worker } from "bullmq"
+import { redisConnection } from "@/lib/redis"
+import nodemailer from "nodemailer"
+import UserModel from "@/model/User"
+import dbConnect from "@/lib/dbConnect"
+
+// Configure Nodemailer specifically for Gmail App Password
+const gmailTransporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+})
+
+export const emailWorker = new Worker(
+  "email-notification-queue",
+  async (job) => {
+    // Ensure MongoDB connection is active inside the worker execution
+    await dbConnect()
+
+    const { recipientId, unreadCount } = job.data
+
+    const user = await UserModel.findById(recipientId)
+    if (!user || !user.email) return
+
+    await gmailTransporter.sendMail({
+      from: `"Anonymous Inbox" <${process.env.GMAIL_USER}>`,
+      to: user.email,
+      subject: `📥 You have ${unreadCount} unread anonymous messages!`,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+          <h2 style="color: #2563eb;">Hello ${user.username},</h2>
+          <p>You have accumulated <strong>${unreadCount} unread messages</strong> waiting on your dashboard.</p>
+          <p style="margin-top: 20px;">
+            <a href="${process.env.NEXTAUTH_URL}/dashboard" 
+               style="background-color: #2563eb; color: #ffffff; padding: 12px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
+               View Dashboard
+            </a>
+          </p>
+        </div>
+      `,
+    })
+
+    console.log(`[Gmail Worker] Digest sent to ${user.email}`)
+  },
+  { 
+    connection: redisConnection,
+    concurrency: 5 // Process up to 5 emails concurrently
+  }
+)
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\workers\guestExpiryWorker.ts
+==========================================================================================
+
+import { Worker } from "bullmq";
+import { redisConnection } from "../lib/redis";
+import dbConnect from "../lib/dbConnect";
+import UserModel from "../model/User";
+
+export const guestExpiryWorker = new Worker(
+  "guest-expiry-queue",
+  async (job) => {
+    await dbConnect();
+    const { recipientUsername, messageId } = job.data;
+
+    console.log(`[Expiry Worker] Deleting guest message ${messageId} for user ${recipientUsername}`);
+
+    // Pull subdocument message from user.messages array
+    await UserModel.updateOne(
+      { username: recipientUsername },
+      { $pull: { messages: { _id: messageId } } }
+    );
+  },
+  { connection: redisConnection }
+);
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\workers\messageWorker.ts
+==========================================================================================
+
+import { Worker } from "bullmq";
+import { Server as SocketServer } from "socket.io";
+import mongoose from "mongoose";
+import { redis, redisConnection } from "../lib/redis";
+import dbConnect from "../lib/dbConnect";
+import UserModel from "../model/User";
+import ConversationModel from "../model/Conversation";
+import { guestExpiryQueue, emailQueue } from "../lib/queue";
+
+declare global {
+  var io: SocketServer | undefined;
+}
+
+export const initMessageWorker = () => {
+  const worker = new Worker(
+    "message-processing",
+    async (job) => {
+      await dbConnect();
+      const { type } = job.data;
+
+      // ─────────────────────────────────────────────────────────────
+      // 1. UNIDIRECTIONAL GUEST MESSAGE PROCESSING
+      // ─────────────────────────────────────────────────────────────
+      if (type === "GUEST_MESSAGE") {
+        const { recipientUsername, content, createdAt } = job.data;
+
+        const user = await UserModel.findOne({ username: recipientUsername }).select("isAcceptingMessage email");
+        if (!user) throw new Error(`User ${recipientUsername} not found`);
+
+        // Worker fail-safe guard: stop execution if user closed public messages
+        if (!user.isAcceptingMessage) {
+          console.log(`[BullMQ] User ${recipientUsername} is not accepting messages. Skipping job.`);
+          return;
+        }
+
+        // Generate explicit ObjectId for atomic array push (avoids loading entire messages array in memory)
+        const messageId = new mongoose.Types.ObjectId();
+        const newMessage = {
+          _id: messageId,
+          content,
+          createdAt: new Date(createdAt),
+        };
+
+        await UserModel.updateOne(
+          { _id: user._id },
+          { $push: { messages: newMessage } }
+        );
+
+        // A. SCHEDULE 24-HOUR AUTO-DELETION FOR GUEST MESSAGE
+        await guestExpiryQueue.add(
+          "delete-guest-message",
+          { recipientUsername, messageId: messageId.toString() },
+          {
+            delay: 24 * 60 * 60 * 1000, // 24 Hours in ms
+            removeOnComplete: true,
+          }
+        );
+
+        // B. REDIS UNREAD COUNTER & GMAIL NOTIFICATION TRIGGER
+        const unreadKey = `unread:${recipientUsername}`;
+        const cooldownKey = `email_cooldown:${recipientUsername}`;
+
+        const currentUnread = await redis.incr(unreadKey);
+
+        if (currentUnread >= 10) {
+          const isCoolingDown = await redis.get(cooldownKey);
+
+          if (!isCoolingDown && user.email) {
+            // Set 1-hour cooldown key in Redis
+            await redis.set(cooldownKey, "true", "EX", 3600);
+
+            // Dispatch job to email queue
+            await emailQueue.add("send-unread-digest", {
+              recipientId: user._id.toString(),
+              unreadCount: currentUnread,
+            });
+          }
+        }
+
+        // Invalidate message list cache in Redis
+        await redis.del(`user:${recipientUsername}:messages`);
+
+        // Emit real-time notification to recipient via Socket.io
+        if (global.io) {
+          global.io.to(`user:${recipientUsername}`).emit("newMessage", {
+            type: "GUEST_MESSAGE",
+            message: newMessage,
+          });
+        }
+      }
+
+      // ─────────────────────────────────────────────────────────────
+      // 2. BIDIRECTIONAL ANONYMOUS CHAT THREAD PROCESSING
+      // ─────────────────────────────────────────────────────────────
+      if (type === "CHAT_THREAD_MESSAGE") {
+        const { conversationId, senderUsername, recipientUsername, content, senderAlias } = job.data;
+
+        const threadMsg = {
+          senderUsername,
+          senderAlias: senderAlias || "Anonymous Persona",
+          content,
+          createdAt: new Date(),
+        };
+
+        const updatedConversation = await ConversationModel.findOneAndUpdate(
+          conversationId
+            ? { _id: conversationId }
+            : { participants: { $all: [senderUsername, recipientUsername] } },
+          {
+            $push: { messages: threadMsg },
+            $setOnInsert: { participants: [senderUsername, recipientUsername] },
+            $set: { updatedAt: new Date() },
+          },
+          { upsert: true, new: true }
+        );
+
+        const socketPayload = {
+          conversationId: updatedConversation._id.toString(),
+          message: {
+            senderAlias: threadMsg.senderAlias,
+            content: threadMsg.content,
+            createdAt: threadMsg.createdAt,
+          },
+        };
+
+        if (global.io) {
+          global.io.to(`user:${recipientUsername}`).emit("threadMessage", socketPayload);
+          global.io.to(`user:${senderUsername}`).emit("threadMessage", socketPayload);
+        }
+      }
+    },
+    { connection: redisConnection, concurrency: 5 }
+  );
+
+  worker.on("completed", (job) => console.log(`[BullMQ] Job ${job.id} completed successfully`));
+  worker.on("failed", (job, err) => console.error(`[BullMQ] Job ${job?.id} failed:`, err));
+};

@@ -1,53 +1,63 @@
-import dbConnect from"@/lib/dbConnect" ;
-import UserModel from "@/model/User" ;
-import {Message} from "@/model/User"
+import { NextRequest } from "next/server";
+import { checkRateLimit, isUserAcceptingMessages } from "@/lib/redisHelpers";
+import { messageQueue } from "@/lib/queue";
 
+export async function POST(request: NextRequest) {
+  try {
+    // 1. Extract IP address & enforce Redis Rate Limiting (5 msgs per 60s per IP)
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0] ||
+      request.headers.get("x-real-ip") ||
+      "127.0.0.1";
 
-export async function POST(request: Request) {
-await dbConnect ()
-
-const {username, content,conversationId} = await request.json ()
-try {
-const user=await UserModel.findOne({username})
-
-if(!user){
- return Response.json({
-            success: false,
-            message: "User not found"
+    const rateLimit = await checkRateLimit(ip, 5, 60);
+    if (!rateLimit.allowed) {
+      return Response.json(
+        {
+          success: false,
+          message: "Too many requests. Please wait a minute before sending another message.",
         },
-            { status: 404})
-}
+        { status: 429 }
+      );
+    }
 
-if(!user.isAcceptingMessage){
-return Response.json({
-            success: false,
-            message: "User is not acceptng the messages"
-        },
-            { status: 403})
-}
+    // 2. Parse payload
+    const { username, content } = await request.json();
 
-const newMessage = {
-  content,
-  createdAt: new Date(),
-  conversationId: conversationId || Date.now().toString(),
-  sender: "anonymous",
-};
+    if (!username || !content) {
+      return Response.json(
+        { success: false, message: "Recipient username and content are required" },
+        { status: 400 }
+      );
+    }
 
-user.messages.push(newMessage as any);
-await user. save()
-return Response. json({success:
-true,
-message:"message sent successfully"},{ status :200})
+    // 3. Fast Acceptance Check via Redis RAM Cache (~1ms, skips MongoDB)
+    const isAccepting = await isUserAcceptingMessages(username);
+    if (!isAccepting) {
+      return Response.json(
+        { success: false, message: "User is currently not accepting messages" },
+        { status: 403 }
+      );
+    }
 
-}
-catch(error){
+    // 4. Dispatch job to BullMQ Queue (Asynchronous processing)
+    await messageQueue.add("guest-message", {
+      type: "GUEST_MESSAGE",
+      recipientUsername: username,
+      content,
+      createdAt: new Date(),
+    });
 
-  console. log("Error adding messages ", error)
-return Response. json ({
-success:false,
-message: "Internal server error"},
-{status :500}  
-)
-
-}
+    // 5. Respond instantly (201 Created)
+    return Response.json(
+      { success: true, message: "Message sent successfully" },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Error sending message:", error);
+    return Response.json(
+      { success: false, message: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

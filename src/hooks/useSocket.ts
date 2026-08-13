@@ -11,8 +11,7 @@ export function useSocket() {
   useEffect(() => {
     if (!session?.user?.username || socketRef.current) return;
 
-    // Connect to standalone Socket.io server
-    const socket = io('http://localhost:3001', {
+    const socket = io({
       path: '/socket.io',
       autoConnect: true,
       reconnection: true,
@@ -22,8 +21,7 @@ export function useSocket() {
     socketRef.current = socket;
 
     socket.on('connect', () => {
-      console.log('✅ Connected to Socket.io server');
-      socket.emit('join-user-room', session.user.username);
+      console.log('✅ Socket connected');
     });
 
     socket.on('connect_error', (err) => {

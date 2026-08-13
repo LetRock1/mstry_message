@@ -1,10 +1,10 @@
-/** next.config.js */
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
   output: "standalone",
   experimental: {
-    appDir: true
-  }
+    serverComponentsExternalPackages: ["bullmq", "ioredis"],
+  },
 };
 
 module.exports = nextConfig;

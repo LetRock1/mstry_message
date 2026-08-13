@@ -8,72 +8,69 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   try {
     await dbConnect();
-
     const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
-      return Response.json({ success: false, message: "Unauthorized" }, { status: 401 });
-    }
+    if (!session?.user) return Response.json({ success: false }, { status: 401 });
 
-    const { username: recipientUsername, content, conversationId } = await req.json();
-
-    if (!recipientUsername || !content || !conversationId) {
+    const { content, conversationId, recipientUsername: optionalRecipient } = await req.json();
+    if (!content || !conversationId) {
       return Response.json({ success: false, message: "Missing fields" }, { status: 400 });
     }
 
-    const recipient = await UserModel.findOne({ username: recipientUsername });
-    if (!recipient) {
-      return Response.json({ success: false, message: "User not found" }, { status: 404 });
+    const currentUser = await UserModel.findOne({ username: session.user.username });
+    if (!currentUser) return Response.json({ success: false }, { status: 404 });
+
+    // 1) Try the optional recipientUsername provided by the client
+    let otherUsername = optionalRecipient;
+
+    // 2) Fallback: extract from our messages
+    if (!otherUsername) {
+      const ourMessages = currentUser.messages.filter(
+        (m: any) => m.conversationId === conversationId
+      );
+      if (ourMessages.length === 0) {
+        return Response.json({ success: false, message: "Conversation not found" }, { status: 404 });
+      }
+      for (const msg of ourMessages) {
+        if (msg.sender === "me" && msg.recipientUsername) {
+          otherUsername = msg.recipientUsername;
+          break;
+        }
+        if (msg.sender === "anonymous" && msg.senderUsername) {
+          otherUsername = msg.senderUsername;
+          break;
+        }
+      }
     }
 
-    // Find all messages in this conversation
-    const convMsgs = recipient.messages.filter((m: any) => m.conversationId === conversationId);
-
-    if (convMsgs.length === 0) {
-      return Response.json({ success: false, message: "Conversation not found" }, { status: 404 });
-    }
-
-    // Get the FIRST message in the conversation (oldest one)
-    // Assuming messages are appended in chronological order
-    const firstMessage = convMsgs[0];
-
-    // Block ONLY if the conversation STARTED with true anonymous
-    const isTrueAnonymousConversation = firstMessage.sender === "anonymous";
-
-    if (isTrueAnonymousConversation) {
+    if (!otherUsername) {
       return Response.json(
-        { success: false, message: "Cannot reply to anonymous messages" },
-        { status: 403 }
+        { success: false, message: "Cannot determine who to reply to" },
+        { status: 400 }
       );
     }
 
-    // Allowed reply (mystery conversation)
+    const recipient = await UserModel.findOne({ username: otherUsername });
+    if (!recipient) return Response.json({ success: false, message: "Recipient not found" }, { status: 404 });
 
-    // Message for recipient (always anonymous)
-    const replyForRecipient = {
+    // Push to recipient
+    recipient.messages.push({
       content,
       createdAt: new Date(),
       conversationId,
-      sender: "anonymous"
-    };
+      sender: "anonymous",
+      senderUsername: session.user.username,
+    });
 
-    // Message for current user (outgoing reply)
-    const replyForCurrentUser = {
+    // Push to current user
+    currentUser.messages.push({
       content,
       createdAt: new Date(),
       conversationId,
-      sender: "me"
-    };
+      sender: "me",
+      recipientUsername: otherUsername,
+    });
 
-    // Save to recipient
-    recipient.messages.push(replyForRecipient);
-    await recipient.save();
-
-    // Save to current replier (outgoing)
-    const currentUser = await UserModel.findOne({ username: session.user.username });
-    if (currentUser) {
-      currentUser.messages.push(replyForCurrentUser);
-      await currentUser.save();
-    }
+    await Promise.all([recipient.save(), currentUser.save()]);
 
     return Response.json({ success: true, message: "Reply sent" });
   } catch (error) {
