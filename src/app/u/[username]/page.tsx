@@ -66,12 +66,6 @@ export default function Page({ params }: Props) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6">
       {/* Online status */}
-      <div className="flex items-center gap-2 mb-4">
-        <Circle className={`w-3 h-3 ${onlineStatus.online ? 'text-green-500 fill-green-500' : 'text-gray-400 fill-gray-400'}`} />
-        <span className="text-sm">
-          {onlineStatus.online ? 'Online' : onlineStatus.lastSeen ? `Last seen ${new Date(onlineStatus.lastSeen).toLocaleString()}` : 'Offline'}
-        </span>
-      </div>
 
       <h1 className="text-3xl font-bold mb-4">Send Anonymous Message to @{username}</h1>
 
@@ -82,10 +76,6 @@ export default function Page({ params }: Props) {
       <button onClick={handleSend} disabled={loading}
         className="bg-black text-white px-6 py-2 rounded-lg mb-4">
         {loading ? "Sending..." : "Send It"}
-      </button>
-
-      <button onClick={handleSuggest} className="bg-gray-300 px-4 py-2 rounded-lg mb-4">
-        Suggest Messages
       </button>
 
       <div className="w-full max-w-xl">

@@ -47,7 +47,7 @@ type Conversation = {
   otherUsername?: string
 }
 
-// ✅ Move component outside to avoid re-creation and hydration mismatch
+// Component moved outside to avoid re‑creation and hydration issues
 function OnlineStatusIndicator({ username }: { username: string }) {
   const { online, lastSeen } = useOnlineStatus(username)
   return (
@@ -98,7 +98,6 @@ export default function Page() {
       await axios.post("/api/block", { targetUsername: target, action: "unblock" })
       setBlockedUsers(prev => prev.filter(u => u !== target))
       toast({ title: `Unblocked @${target}` })
-      // Reload messages so the thread reappears
       fetchMessages()
     } catch (err: any) {
       toast({ title: "Error", description: err.response?.data?.message || "", variant: "destructive" })
@@ -113,6 +112,24 @@ export default function Page() {
       toast({ title: "Conversation deleted" })
     } catch (err: any) {
       toast({ title: "Error", description: err.response?.data?.message || "", variant: "destructive" })
+    }
+  }
+
+  // --- Delete single message (works for both guest and conversation) ---
+  const handleDeleteSingleMessage = async (messageId: string) => {
+    if (!window.confirm("Delete this message?")) return;
+    try {
+      await axios.delete(`/api/delete-message/${messageId}`)
+      setConversations(prev =>
+        prev.map(conv => ({
+          ...conv,
+          messages: conv.messages.filter(m => m._id !== messageId),
+        })).filter(conv => conv.messages.length > 0)
+      )
+      setGuestMessages(prev => prev.filter(m => m._id !== messageId))
+      toast({ title: "Message deleted" })
+    } catch (err: any) {
+      toast({ title: "Error", description: err.response?.data?.message || "Failed to delete", variant: "destructive" })
     }
   }
 
@@ -152,17 +169,6 @@ export default function Page() {
     socket.on("newMessage", handleNewMessage)
     return () => { socket.off("newMessage", handleNewMessage) }
   }, [socket, toast])
-
-  // --- Delete single message ---
-  const handleDeleteMessage = (messageId: string) => {
-    setGuestMessages(prev => prev.filter(msg => msg._id !== messageId))
-    setConversations(prev =>
-      prev.map(conv => ({
-        ...conv,
-        messages: conv.messages.filter(msg => msg._id !== messageId),
-      })).filter(conv => conv.messages.length > 0)
-    )
-  }
 
   const handleReplyClick = (conversationId: string) => {
     setActiveConv(prev => (prev === conversationId ? null : conversationId))
@@ -240,7 +246,6 @@ export default function Page() {
       const res = await axios.post("/api/block", { targetUsername: target, action: "block" })
       if (res.data.success) {
         setBlockedUsers(prev => [...prev, target])
-        // Immediately filter out conversations with this user
         setConversations(prev => prev.filter(conv => conv.otherUsername !== target))
         toast({ title: `Blocked @${target}` })
       }
@@ -369,7 +374,7 @@ export default function Page() {
     toast({ title: "Copied", description: "Profile link copied to clipboard" })
   }
 
-  // Filter conversations based on blockedUsers (for display)
+  // Filter conversations based on blockedUsers
   const visibleConversations = conversations.filter(
     conv => !conv.otherUsername || !blockedUsers.includes(conv.otherUsername)
   )
@@ -456,7 +461,7 @@ export default function Page() {
           {guestMessages.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {guestMessages.map(msg => (
-                <MessageCard key={msg._id} message={msg} onMessageDelete={handleDeleteMessage} />
+                <MessageCard key={msg._id} message={msg} onMessageDelete={handleDeleteSingleMessage} />
               ))}
             </div>
           ) : (
@@ -508,14 +513,23 @@ export default function Page() {
                     {conv.messages.map(msg => {
                       const isMe = msg.sender === session?.user?.username || msg.sender === "me"
                       return (
-                        <div key={msg._id} className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
+                        <div key={msg._id} className={`flex flex-col ${isMe ? "items-end" : "items-start"} relative group`}>
                           <div className={`p-3 rounded-2xl max-w-[80%] text-sm shadow-sm ${
-                            isMe ? "bg-blue-600 text-white rounded-br-none" : "bg-white text-gray-800 border rounded-bl-none"}`}>
+                            isMe ? "bg-blue-600 text-white rounded-br-none" : "bg-white text-gray-800 border rounded-bl-none"
+                          }`}>
                             <p>{msg.content}</p>
                             <span className={`block text-[10px] mt-1 text-right ${isMe ? "text-blue-200" : "text-gray-400"}`}>
                               {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Just now"}
                             </span>
                           </div>
+                          {/* Delete individual message */}
+                          <button
+                            onClick={() => handleDeleteSingleMessage(msg._id!)}
+                            className="absolute top-1 right-1 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Delete message"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
                         </div>
                       )
                     })}
