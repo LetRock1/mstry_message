@@ -1,31 +1,21 @@
-import { Worker } from "bullmq"
-import { redisConnection } from "@/lib/redis"
-import nodemailer from "nodemailer"
-import UserModel from "@/model/User"
-import dbConnect from "@/lib/dbConnect"
-
-// Configure Nodemailer specifically for Gmail App Password
-const gmailTransporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-})
+import { Worker } from "bullmq";
+import { redisConnection } from "@/lib/redis";
+import { gmailTransporter } from "@/lib/nodemailer";
+import UserModel from "@/model/User";
+import dbConnect from "@/lib/dbConnect";
 
 export const emailWorker = new Worker(
   "email-notification-queue",
   async (job) => {
-    // Ensure MongoDB connection is active inside the worker execution
-    await dbConnect()
+    await dbConnect();
 
-    const { recipientId, unreadCount } = job.data
+    const { recipientId, unreadCount } = job.data;
 
-    const user = await UserModel.findById(recipientId)
-    if (!user || !user.email) return
+    const user = await UserModel.findById(recipientId);
+    if (!user || !user.email) return;
 
     await gmailTransporter.sendMail({
-      from: `"Anonymous Inbox" <${process.env.GMAIL_USER}>`,
+      from: `"Anonymous Inbox" <${process.env.EMAIL_FROM}>`, // ✅ Use verified sender
       to: user.email,
       subject: `📥 You have ${unreadCount} unread anonymous messages!`,
       html: `
@@ -40,12 +30,12 @@ export const emailWorker = new Worker(
           </p>
         </div>
       `,
-    })
+    });
 
-    console.log(`[Gmail Worker] Digest sent to ${user.email}`)
+    console.log(`[Brevo Worker] Digest sent to ${user.email}`);
   },
-  { 
+  {
     connection: redisConnection,
-    concurrency: 5 // Process up to 5 emails concurrently
+    concurrency: 5,
   }
-)
+);

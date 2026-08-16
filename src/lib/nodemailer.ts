@@ -1,9 +1,12 @@
-import nodemailer from "nodemailer"
+import nodemailer from "nodemailer";
 
+// Shared transporter using Brevo SMTP
 export const gmailTransporter = nodemailer.createTransport({
-  service: "gmail",
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: false, // false for 587, true for 465
   auth: {
-    user: process.env.GMAIL_USER,        // e.g., yourname@gmail.com
-    pass: process.env.GMAIL_APP_PASSWORD, // 16-character Google App Password
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
-})
+});
