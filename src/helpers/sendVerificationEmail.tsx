@@ -1,7 +1,7 @@
 import { render } from "@react-email/render";
 import VerificationEmail from "../../emails/VerificationEmail";
 import { ApiResponse } from "@/types/ApiResponse";
-import { gmailTransporter } from "@/lib/nodemailer";
+import { sendEmail } from "@/lib/brevo";
 
 export async function sendVerificationEmail(
   email: string,
@@ -13,8 +13,7 @@ export async function sendVerificationEmail(
       <VerificationEmail username={username} otp={verifyCode} />
     );
 
-    await gmailTransporter.sendMail({
-      from: `"Mystery Message" <${process.env.EMAIL_FROM}>`, // ✅ Use verified sender
+    await sendEmail({
       to: email,
       subject: "Mystery Message | Verification code",
       html: emailHtml,
