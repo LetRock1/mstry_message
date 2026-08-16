@@ -79,7 +79,6 @@ export default function Page() {
   const { data: session, update: updateSession } = useSession()
   const socket = useSocket()
 
-  // ✅ Prevents re-fetching after session updates, which caused the toggle to revert
   const hasFetchedInitial = useRef(false)
 
   const fetchBlockedUsers = async () => {
@@ -112,7 +111,6 @@ export default function Page() {
   }
 
   const handleDeleteSingleMessage = async (messageId: string) => {
-    if (!window.confirm("Delete this message?")) return;
     try {
       await axios.delete(`/api/delete-message/${messageId}`)
       setConversations(prev =>
@@ -172,7 +170,7 @@ export default function Page() {
     if (!replyText.trim() || !convId) return
 
     const optimisticMsg: SafeMessage = {
-      _id: Date.now().toString(),
+      _id: `temp-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       content: replyText,
       createdAt: new Date(),
       conversationId: convId,
@@ -259,7 +257,9 @@ export default function Page() {
     setIsSwitchLoading(true)
     try {
       const res = await axios.get<ApiResponse>("/api/accept-messages")
-      setAcceptMessages(res.data.isAcceptingMessages ?? false)
+      // ✅ Read both possible field names
+      const isAccepting = res.data.isAcceptingMessages ?? res.data.isAcceptingMessage ?? false;
+      setAcceptMessages(isAccepting)
     } catch (err) {
       const axiosErr = err as AxiosError<ApiResponse>
       toast({
@@ -319,7 +319,6 @@ export default function Page() {
     }
   }, [toast])
 
-  // ✅ Only fetch on initial mount, not after session update
   useEffect(() => {
     if (session?.user && !hasFetchedInitial.current) {
       hasFetchedInitial.current = true
@@ -335,7 +334,7 @@ export default function Page() {
       const res = await axios.post<ApiResponse>("/api/accept-messages", {
         acceptMessages: nextStatus,
       });
-      setAcceptMessages(nextStatus); // ✅ immediate UI update
+      setAcceptMessages(nextStatus);
       await updateSession({ isAcceptingMessage: nextStatus });
       toast({ title: res.data.message });
     } catch (err) {

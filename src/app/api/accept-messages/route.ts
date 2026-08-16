@@ -41,7 +41,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 🔥 FORCE REDIS CACHE RESET – ensures toggle is immediate
+    // 🔥 Update Redis cache
     await redis.del(`user:${updatedUser.username}:accepting`);
     await redis.set(
       `user:${updatedUser.username}:accepting`,
@@ -52,7 +52,8 @@ export async function POST(request: Request) {
       {
         success: true,
         message: "Message acceptance status updated successfully",
-        isAcceptingMessage: updatedUser.isAcceptingMessage,
+        isAcceptingMessages: updatedUser.isAcceptingMessage, // ✅ plural
+        isAcceptingMessage: updatedUser.isAcceptingMessage,  // ✅ singular fallback
       },
       { status: 200 }
     );
@@ -110,7 +111,8 @@ export async function GET(request: Request) {
     return Response.json(
       {
         success: true,
-        isAcceptingMessage: foundUser.isAcceptingMessage,
+        isAcceptingMessages: foundUser.isAcceptingMessage, // ✅ plural
+        isAcceptingMessage: foundUser.isAcceptingMessage,  // ✅ singular fallback
       },
       { status: 200 }
     );

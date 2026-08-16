@@ -1,38 +1,38 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useSession } from 'next-auth/react';
 
+let globalSocket: Socket | null = null;
+
 export function useSocket() {
   const { data: session } = useSession();
-  const socketRef = useRef<Socket | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(globalSocket);
 
   useEffect(() => {
-    if (!session?.user?.username || socketRef.current) return;
+    if (!session?.user?.username) return;
 
-    const socket = io({
-      path: '/socket.io',
-      autoConnect: true,
-      reconnection: true,
-      reconnectionAttempts: 5,
-    });
+    if (!globalSocket) {
+      const newSocket = io({
+        path: '/socket.io',
+        autoConnect: true,
+        reconnection: true,
+        reconnectionAttempts: 5,
+      });
+      globalSocket = newSocket;
+      setSocket(newSocket);
+    } else {
+      setSocket(globalSocket);
+    }
 
-    socketRef.current = socket;
-
-    socket.on('connect', () => {
-      console.log('✅ Socket connected');
-    });
-
-    socket.on('connect_error', (err) => {
-      console.error('Socket connection error:', err.message);
-    });
+    const currentSocket = globalSocket;
+    currentSocket.connect();
 
     return () => {
-      socket.disconnect();
-      socketRef.current = null;
+      // keep singleton alive
     };
   }, [session?.user?.username]);
 
-  return socketRef.current;
+  return socket;
 }
