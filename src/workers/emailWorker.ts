@@ -1,6 +1,6 @@
 import { Worker } from "bullmq";
 import { redisConnection } from "@/lib/redis";
-import { gmailTransporter } from "@/lib/nodemailer";
+import { sendEmail } from "@/lib/brevo";
 import UserModel from "@/model/User";
 import dbConnect from "@/lib/dbConnect";
 
@@ -10,12 +10,10 @@ export const emailWorker = new Worker(
     await dbConnect();
 
     const { recipientId, unreadCount } = job.data;
-
     const user = await UserModel.findById(recipientId);
     if (!user || !user.email) return;
 
-    await gmailTransporter.sendMail({
-      from: `"Anonymous Inbox" <${process.env.EMAIL_FROM}>`, // ✅ Use verified sender
+    await sendEmail({
       to: user.email,
       subject: `📥 You have ${unreadCount} unread anonymous messages!`,
       html: `
@@ -32,7 +30,7 @@ export const emailWorker = new Worker(
       `,
     });
 
-    console.log(`[Brevo Worker] Digest sent to ${user.email}`);
+    console.log(`[Brevo API Worker] Digest sent to ${user.email}`);
   },
   {
     connection: redisConnection,
