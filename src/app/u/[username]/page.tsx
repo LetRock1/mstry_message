@@ -46,7 +46,7 @@ export default function Page({ params }: Props) {
       });
       const data = await res.json();
       if (data.success) {
-        alert("Message sent ✅");
+        alert("Message sent");
         setMessage("");
       } else alert(data.message);
     } catch (err) {
