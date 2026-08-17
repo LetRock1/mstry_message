@@ -2,9 +2,8 @@ import { createServer } from 'http';
 import { parse } from 'url';
 import next from 'next';
 import { Server } from 'socket.io';
-import { createAdapter } from '@socket.io/redis-adapter';
 import { getToken } from 'next-auth/jwt';
-import { redisConnection, redis } from './src/lib/redis.ts';
+import { redis } from './src/lib/redis.ts';          // ✅ keep Redis for presence/cache
 import { initMessageWorker } from './src/workers/messageWorker.ts';
 
 // Simple cookie parser
@@ -41,10 +40,7 @@ app.prepare().then(() => {
     },
   });
 
-  // Redis adapter
-  const pubClient = redisConnection;
-  const subClient = redisConnection.duplicate();
-  io.adapter(createAdapter(pubClient, subClient));
+  // ❌ Removed Redis adapter – single instance uses in-memory rooms
 
   // Socket authentication middleware
   io.use(async (socket, next) => {
