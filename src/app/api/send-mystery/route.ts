@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
 import { isUserAcceptingMessages } from "@/lib/redisHelpers";
 import { redis } from "@/lib/redis";
+import { getIO } from "@/lib/socket";   // ✅ new import
 
 export async function POST(req: Request) {
   try {
@@ -62,10 +63,11 @@ export async function POST(req: Request) {
     await Promise.all([recipient.save(), senderUser!.save()]);
     await redis.incr(`unread:${recipientUsername}`);
 
+    const io = getIO();   // ✅ use shared instance
     console.log(`[send-mystery] recipient: ${recipientUsername}`);
-    console.log(`[send-mystery] global.io exists: ${!!global.io}`);
-    if (global.io) {
-      global.io.to(`user:${recipientUsername}`).emit("newMessage", {
+    console.log(`[send-mystery] io exists: ${!!io}`);
+    if (io) {
+      io.to(`user:${recipientUsername}`).emit("newMessage", {
         _id: recipient.messages[recipient.messages.length - 1]._id?.toString(),
         content,
         createdAt: new Date(),
@@ -75,7 +77,7 @@ export async function POST(req: Request) {
       });
       console.log(`[send-mystery] emitted to user:${recipientUsername}`);
     } else {
-      console.error("[send-mystery] global.io is not set!");
+      console.error("[send-mystery] io is not set!");
     }
 
     return Response.json({ success: true, conversationId });

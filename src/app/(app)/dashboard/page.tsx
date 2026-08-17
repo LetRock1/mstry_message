@@ -319,6 +319,14 @@ export default function Page() {
   }, [toast])
 
   useEffect(() => {
+  if (!session?.user) return;
+  const interval = setInterval(() => {
+    fetchMessages();
+  }, 5000);
+  return () => clearInterval(interval);
+}, [session, fetchMessages]);
+
+  useEffect(() => {
     if (session?.user && !hasFetchedInitial.current) {
       hasFetchedInitial.current = true
       fetchMessages()

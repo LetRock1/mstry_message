@@ -3,8 +3,9 @@ import { parse } from 'url';
 import next from 'next';
 import { Server } from 'socket.io';
 import { getToken } from 'next-auth/jwt';
-import { redis } from './src/lib/redis.ts';          // ✅ keep Redis for presence/cache
+import { redis } from './src/lib/redis.ts';
 import { initMessageWorker } from './src/workers/messageWorker.ts';
+import { setIO } from './src/lib/socket.ts';   // ✅ new import
 
 // Simple cookie parser
 function parseCookies(cookieHeader) {
@@ -40,7 +41,7 @@ app.prepare().then(() => {
     },
   });
 
-  // ❌ Removed Redis adapter – single instance uses in-memory rooms
+  setIO(io);   // ✅ store io instance
 
   // Socket authentication middleware
   io.use(async (socket, next) => {
@@ -54,10 +55,7 @@ app.prepare().then(() => {
         : 'next-auth.session-token';
 
       const token = await getToken({
-        req: {
-          headers: socket.handshake.headers,
-          cookies: parsed,
-        },
+        req: { headers: socket.handshake.headers, cookies: parsed },
         secret: process.env.NEXTAUTH_SECRET,
       });
 
@@ -75,10 +73,8 @@ app.prepare().then(() => {
     const username = socket.data.username;
     console.log(`User connected: ${username}`);
 
-    // Auto join room
     socket.join(`user:${username}`);
 
-    // Handle explicit join-room event (idempotent)
     socket.on('join-room', (roomUsername) => {
       if (roomUsername && typeof roomUsername === 'string') {
         socket.join(`user:${roomUsername}`);
@@ -86,17 +82,12 @@ app.prepare().then(() => {
       }
     });
 
-    // Presence counter to support multiple tabs
     const presenceKey = `presence:${username}`;
     const count = await redis.incr(presenceKey);
     if (count === 1) {
       await redis.sadd('online_users', username);
       await redis.set(`lastseen:${username}`, Date.now());
-      io.emit('user-status-changed', {
-        username,
-        status: 'online',
-        lastSeen: null,
-      });
+      io.emit('user-status-changed', { username, status: 'online', lastSeen: null });
     }
 
     socket.on('disconnect', async () => {
@@ -106,16 +97,11 @@ app.prepare().then(() => {
         await redis.srem('online_users', username);
         const lastSeen = Date.now();
         await redis.set(`lastseen:${username}`, lastSeen);
-        io.emit('user-status-changed', {
-          username,
-          status: 'offline',
-          lastSeen,
-        });
+        io.emit('user-status-changed', { username, status: 'offline', lastSeen });
       }
     });
   });
 
-  global.io = io;
   initMessageWorker();
 
   httpServer.listen(port, () => {

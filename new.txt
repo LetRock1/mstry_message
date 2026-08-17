@@ -51,6 +51,8 @@ mstrymessage
 │   │   │   │   │   └── route.ts
 │   │   │   │   ├── check-username-unique
 │   │   │   │   │   └── route.ts
+│   │   │   │   ├── delete-conversation
+│   │   │   │   │   └── route.ts
 │   │   │   │   ├── delete-message
 │   │   │   │   │   ├── [messageid]
 │   │   │   │   │   │   └── route.ts
@@ -70,6 +72,13 @@ mstrymessage
 │   │   │   │   │   └── route.ts
 │   │   │   │   ├── suggest-messages
 │   │   │   │   │   └── route.ts
+│   │   │   │   ├── test-email
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── user
+│   │   │   │   │   ├── delete
+│   │   │   │   │   │   └── route.ts
+│   │   │   │   │   ├── status
+│   │   │   │   │   │   └── route.ts
 │   │   │   │   ├── verify-code
 │   │   │   │   │   └── route.ts
 │   │   │   ├── u
@@ -96,8 +105,10 @@ mstrymessage
 │   │   │   └── sendVerificationEmail.tsx
 │   │   ├── hooks
 │   │   │   └── use-toast.ts
+│   │   │   └── useOnlineStatus.ts
 │   │   │   └── useSocket.ts
 │   │   ├── lib
+│   │   │   └── brevo.ts
 │   │   │   └── dbConnect.ts
 │   │   │   └── nodemailer.ts
 │   │   │   └── queue.ts
@@ -270,8 +281,8 @@ FILE: c:\Users\krish\Desktop\next\mstrymessage\package.json
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "tailwind-merge": "^3.4.0",
+    "tsx": "^4.23.1",
     "usehooks-ts": "^3.1.1",
-    "zo": "^0.0.2",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -287,11 +298,9 @@ FILE: c:\Users\krish\Desktop\next\mstrymessage\package.json
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",
     "tailwindcss-animate": "^1.0.7",
-    "tsx": "^4.23.1",
     "typescript": "^5"
   }
 }
-
 
 ==========================================================================================
 FILE: c:\Users\krish\Desktop\next\mstrymessage\postcss.config.js
@@ -478,11 +487,22 @@ import { createServer } from 'http';
 import { parse } from 'url';
 import next from 'next';
 import { Server } from 'socket.io';
-import { createAdapter } from '@socket.io/redis-adapter';
 import { getToken } from 'next-auth/jwt';
-import parseCookie from 'cookie';
-import { redis } from './src/lib/redis.ts'; // Changed to .ts
-import { initMessageWorker } from './src/workers/messageWorker.ts'; // Added worker import
+import { redis } from './src/lib/redis.ts';          // ✅ keep Redis for presence/cache
+import { initMessageWorker } from './src/workers/messageWorker.ts';
+
+// Simple cookie parser
+function parseCookies(cookieHeader) {
+  const cookies = {};
+  if (!cookieHeader) return cookies;
+  cookieHeader.split(';').forEach(cookie => {
+    const parts = cookie.split('=');
+    const name = parts[0].trim();
+    const value = parts.slice(1).join('=').trim();
+    if (name) cookies[name] = decodeURIComponent(value);
+  });
+  return cookies;
+}
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = 'localhost';
@@ -500,40 +520,34 @@ app.prepare().then(() => {
   const io = new Server(httpServer, {
     path: '/socket.io',
     cors: {
-      origin: '*', // Adjust to your domain in production
+      origin: '*',
       methods: ['GET', 'POST'],
     },
   });
 
-  // Attach Redis Adapter for Multi-Server Scaling
-  const pubClient = redis;
-  const subClient = redis.duplicate();
-  io.adapter(createAdapter(pubClient, subClient));
+  // ❌ Removed Redis adapter – single instance uses in-memory rooms
 
-  // --- NextAuth Socket Authentication Middleware ---
-  // Authenticates connected sockets automatically using NextAuth session cookies
+  // Socket authentication middleware
   io.use(async (socket, next) => {
     try {
       const rawCookies = socket.handshake.headers.cookie;
-      if (!rawCookies) {
-        return next(new Error('Authentication failed: No session cookies'));
-      }
+      if (!rawCookies) return next(new Error('No cookies'));
 
-      const parsedCookies = parseCookie.parse(rawCookies);
+      const parsed = parseCookies(rawCookies);
       const tokenKey = process.env.NODE_ENV === 'production'
         ? '__Secure-next-auth.session-token'
         : 'next-auth.session-token';
 
       const token = await getToken({
-        req: { headers: socket.handshake.headers, cookies: parsedCookies },
+        req: {
+          headers: socket.handshake.headers,
+          cookies: parsed,
+        },
         secret: process.env.NEXTAUTH_SECRET,
       });
 
-      if (!token || !token.username) {
-        return next(new Error('Authentication failed: Invalid token'));
-      }
+      if (!token?.username) return next(new Error('Invalid token'));
 
-      // Securely attach verified username to socket instance
       socket.data.username = token.username;
       next();
     } catch (err) {
@@ -542,23 +556,51 @@ app.prepare().then(() => {
     }
   });
 
-  // Socket Connections
-  io.on('connection', (socket) => {
+  io.on('connection', async (socket) => {
     const username = socket.data.username;
-    console.log(`Authenticated user connected: ${username}`);
+    console.log(`User connected: ${username}`);
 
-    // Automatically join the user's secure room upon connection
+    // Auto join room
     socket.join(`user:${username}`);
 
-    socket.on('disconnect', () => {
+    // Handle explicit join-room event (idempotent)
+    socket.on('join-room', (roomUsername) => {
+      if (roomUsername && typeof roomUsername === 'string') {
+        socket.join(`user:${roomUsername}`);
+        console.log(`User ${username} explicitly joined room user:${roomUsername}`);
+      }
+    });
+
+    // Presence counter to support multiple tabs
+    const presenceKey = `presence:${username}`;
+    const count = await redis.incr(presenceKey);
+    if (count === 1) {
+      await redis.sadd('online_users', username);
+      await redis.set(`lastseen:${username}`, Date.now());
+      io.emit('user-status-changed', {
+        username,
+        status: 'online',
+        lastSeen: null,
+      });
+    }
+
+    socket.on('disconnect', async () => {
       console.log(`User disconnected: ${username}`);
+      const remaining = await redis.decr(presenceKey);
+      if (remaining <= 0) {
+        await redis.srem('online_users', username);
+        const lastSeen = Date.now();
+        await redis.set(`lastseen:${username}`, lastSeen);
+        io.emit('user-status-changed', {
+          username,
+          status: 'offline',
+          lastSeen,
+        });
+      }
     });
   });
 
-  // Make io instance globally available to workers
   global.io = io;
-
-  // INITIALIZE BULLMQ WORKER HERE!
   initMessageWorker();
 
   httpServer.listen(port, () => {
@@ -957,33 +999,20 @@ export default function RootLayout({
 FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\(app)\layout.tsx
 ==========================================================================================
 
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import Navbar from "@/components/Navbar";
 
-const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Create Next App",
-  description: "Generated by create next app",
-};
-
-export default function RootLayout({
+export default function AppLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-        <body className={inter.className}>
-          <Navbar/>
-          {children}
-        </body>
-      
-    </html>
+    <>
+      <Navbar />
+      {children}
+    </>
   );
 }
-
 
 ==========================================================================================
 FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\(app)\page.tsx
@@ -1159,43 +1188,75 @@ FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\(app)\dashboard\page.tsx
 
 import MessageCard from "@/components/MessageCard"
 import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
 import { Message } from "@/model/User"
-import { acceptMessageSchema } from "@/schemas/acceptMessageSchema"
 import { ApiResponse } from "@/types/ApiResponse"
-import { zodResolver } from "@hookform/resolvers/zod"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import axios, { AxiosError } from "axios"
-import { Loader2, RefreshCcw, Send, MessageSquare, MessagesSquare, UserCircle2 } from "lucide-react"
+import {
+  Loader2, RefreshCcw, Send, MessageSquare, MessagesSquare,
+  UserCircle2, Ban, Trash2, X, Circle, Check, XCircle
+} from "lucide-react"
 import { useSession } from "next-auth/react"
-import { useCallback, useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useSocket } from "@/hooks/useSocket"
+import { useOnlineStatus } from "@/hooks/useOnlineStatus"
 
 type SafeMessage = Message & {
   _id?: string
   createdAt?: Date | null
   conversationId?: string
   sender?: string
+  recipientUsername?: string
+  senderUsername?: string
 }
 
 type Conversation = {
   conversationId: string
   messages: SafeMessage[]
+  otherUsername?: string
+}
+
+function OnlineStatusIndicator({ username }: { username: string }) {
+  const { online, lastSeen } = useOnlineStatus(username)
+  return (
+    <span className="flex items-center gap-1 text-xs text-gray-500">
+      <Circle
+        className={`w-2 h-2 ${
+          online ? 'text-green-500 fill-green-500' : 'text-gray-400 fill-gray-400'
+        }`}
+      />
+      {online
+        ? 'Online'
+        : lastSeen
+        ? `Last seen ${new Date(lastSeen).toLocaleString()}`
+        : 'Offline'}
+    </span>
+  )
 }
 
 export default function Page() {
   const [guestMessages, setGuestMessages] = useState<SafeMessage[]>([])
   const [conversations, setConversations] = useState<Conversation[]>([])
+  const [blockedUsers, setBlockedUsers] = useState<string[]>([])
 
   const [isLoading, setIsLoading] = useState(false)
   const [isSwitchLoading, setIsSwitchLoading] = useState(false)
+  const [acceptMessages, setAcceptMessages] = useState(false)
   const [replyText, setReplyText] = useState("")
   const [activeConv, setActiveConv] = useState<string | null>(null)
-
-  // Mystery send form state
   const [targetUsername, setTargetUsername] = useState("")
   const [mysteryContent, setMysteryContent] = useState("")
   const [isSendingMystery, setIsSendingMystery] = useState(false)
@@ -1204,7 +1265,53 @@ export default function Page() {
   const { data: session, update: updateSession } = useSession()
   const socket = useSocket()
 
-  // --- Real-Time Socket Listener ---
+  const hasFetchedInitial = useRef(false)
+
+  const fetchBlockedUsers = async () => {
+    try {
+      const res = await axios.get("/api/block")
+      if (res.data.success) setBlockedUsers(res.data.blockedUsers || [])
+    } catch (e) {}
+  }
+  useEffect(() => { fetchBlockedUsers() }, [])
+
+  const handleUnblock = async (target: string) => {
+    try {
+      await axios.post("/api/block", { targetUsername: target, action: "unblock" })
+      setBlockedUsers(prev => prev.filter(u => u !== target))
+      toast({ title: `Unblocked @${target}` })
+      fetchMessages()
+    } catch (err: any) {
+      toast({ title: "Error", description: err.response?.data?.message || "", variant: "destructive" })
+    }
+  }
+
+  const handleDeleteConversation = async (conversationId: string) => {
+    try {
+      await axios.delete(`/api/delete-conversation?conversationId=${conversationId}`)
+      setConversations(prev => prev.filter(c => c.conversationId !== conversationId))
+      toast({ title: "Conversation deleted" })
+    } catch (err: any) {
+      toast({ title: "Error", description: err.response?.data?.message || "", variant: "destructive" })
+    }
+  }
+
+  const handleDeleteSingleMessage = async (messageId: string) => {
+    try {
+      await axios.delete(`/api/delete-message/${messageId}`)
+      setConversations(prev =>
+        prev.map(conv => ({
+          ...conv,
+          messages: conv.messages.filter(m => m._id !== messageId),
+        })).filter(conv => conv.messages.length > 0)
+      )
+      setGuestMessages(prev => prev.filter(m => m._id !== messageId))
+      toast({ title: "Message deleted" })
+    } catch (err: any) {
+      toast({ title: "Error", description: err.response?.data?.message || "Failed to delete", variant: "destructive" })
+    }
+  }
+
   useEffect(() => {
     if (!socket) return
 
@@ -1215,6 +1322,8 @@ export default function Page() {
         conversationId: newMsg.conversationId,
         sender: newMsg.sender || "anonymous",
         createdAt: newMsg.createdAt ? new Date(newMsg.createdAt) : new Date(),
+        recipientUsername: newMsg.recipientUsername,
+        senderUsername: newMsg.senderUsername,
       }
 
       if (!normalized.conversationId) {
@@ -1227,7 +1336,8 @@ export default function Page() {
             updated[index].messages.push(normalized)
             return updated
           }
-          return [...prev, { conversationId: normalized.conversationId!, messages: [normalized] }]
+          const other = normalized.sender === "anonymous" ? normalized.senderUsername : normalized.recipientUsername
+          return [...prev, { conversationId: normalized.conversationId!, messages: [normalized], otherUsername: other }]
         })
       }
 
@@ -1235,38 +1345,23 @@ export default function Page() {
     }
 
     socket.on("newMessage", handleNewMessage)
-    return () => {
-      socket.off("newMessage", handleNewMessage)};
+    return () => { socket.off("newMessage", handleNewMessage) }
   }, [socket, toast])
-
-  // --- Delete Handler ---
-  const handleDeleteMessage = (messageId: string) => {
-    setGuestMessages(prev => prev.filter(msg => msg._id !== messageId))
-
-    setConversations(prev =>
-      prev
-        .map(conv => ({
-          ...conv,
-          messages: conv.messages.filter(msg => msg._id !== messageId),
-        }))
-        .filter(conv => conv.messages.length > 0)
-    )
-  }
 
   const handleReplyClick = (conversationId: string) => {
     setActiveConv(prev => (prev === conversationId ? null : conversationId))
   }
 
-  // --- Reply to 2-Way Thread ---
-  const sendReply = async (convId: string) => {
+  const sendReply = async (convId: string, otherUsername?: string) => {
     if (!replyText.trim() || !convId) return
 
     const optimisticMsg: SafeMessage = {
-      _id: Date.now().toString(),
+      _id: `temp-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       content: replyText,
       createdAt: new Date(),
       conversationId: convId,
-      sender: session?.user?.username || "me",
+      sender: "me",
+      recipientUsername: otherUsername,
     }
 
     setConversations(prev =>
@@ -1284,11 +1379,9 @@ export default function Page() {
       const res = await axios.post("/api/reply", {
         content: textToSend,
         conversationId: convId,
+        recipientUsername: otherUsername,
       })
-
-      if (res.data.success) {
-        toast({ title: "Reply sent!" })
-      }
+      if (res.data.success) toast({ title: "Reply sent!" })
     } catch (err: any) {
       toast({
         title: "Error",
@@ -1298,23 +1391,19 @@ export default function Page() {
     }
   }
 
-  // --- Send Mystery Message ---
   const sendMysteryMessage = async () => {
     if (!targetUsername.trim() || !mysteryContent.trim()) return
-
     setIsSendingMystery(true)
-
     try {
       const res = await axios.post("/api/send-mystery", {
         recipientUsername: targetUsername,
         content: mysteryContent,
       })
-
       if (res.data.success) {
         toast({ title: "Sent!", description: "Mystery message delivered" })
         setTargetUsername("")
         setMysteryContent("")
-        fetchMessages(true)
+        fetchMessages()
       }
     } catch (err: any) {
       toast({
@@ -1327,20 +1416,35 @@ export default function Page() {
     }
   }
 
-  // --- Form & Switch Sync ---
-  const form = useForm({
-    resolver: zodResolver(acceptMessageSchema),
-    defaultValues: { acceptMessages: false },
-  })
+  const handleBlock = async (target: string) => {
+    try {
+      const res = await axios.post("/api/block", { targetUsername: target, action: "block" })
+      if (res.data.success) {
+        setBlockedUsers(prev => [...prev, target])
+        setConversations(prev => prev.filter(conv => conv.otherUsername !== target))
+        toast({ title: `Blocked @${target}` })
+      }
+    } catch (err: any) {
+      toast({ title: "Block failed", description: err.response?.data?.message || "", variant: "destructive" })
+    }
+  }
 
-  const { register, watch, setValue } = form
-  const acceptMessages = watch("acceptMessages")
+  const handleDeleteAccount = async () => {
+    try {
+      await axios.delete("/api/user/delete")
+      toast({ title: "Account deleted" })
+      window.location.href = "/"
+    } catch (err: any) {
+      toast({ title: "Delete failed", description: err.response?.data?.message || "", variant: "destructive" })
+    }
+  }
 
   const fetchAcceptMessage = useCallback(async () => {
     setIsSwitchLoading(true)
     try {
       const res = await axios.get<ApiResponse>("/api/accept-messages")
-      setValue("acceptMessages", res.data.isAcceptingMessages ?? false)
+      const isAccepting = res.data.isAcceptingMessages ?? res.data.isAcceptingMessage ?? false;
+      setAcceptMessages(isAccepting)
     } catch (err) {
       const axiosErr = err as AxiosError<ApiResponse>
       toast({
@@ -1351,77 +1455,84 @@ export default function Page() {
     } finally {
       setIsSwitchLoading(false)
     }
-  }, [setValue, toast])
+  }, [toast])
 
-  // --- Fetch Messages ---
-  const fetchMessages = useCallback(
-    async (refresh = false) => {
-      setIsLoading(true)
-      try {
-        const res = await axios.get<ApiResponse>("/api/get-messages")
-        const raw = res.data.messages || []
+  const fetchMessages = useCallback(async (refresh = false) => {
+    setIsLoading(true)
+    try {
+      const res = await axios.get<ApiResponse>("/api/get-messages")
+      const raw = res.data.messages || []
 
-        const normalized: SafeMessage[] = raw.map((m: any) => ({
-          ...m,
-          _id: m._id?.toString(),
-          conversationId: m.conversationId || undefined,
-          sender: m.sender || "anonymous",
-          createdAt: m.createdAt ? new Date(m.createdAt) : null,
-        }))
+      const normalized: SafeMessage[] = raw.map((m: any) => ({
+        ...m,
+        _id: m._id?.toString(),
+        conversationId: m.conversationId || undefined,
+        sender: m.sender || "anonymous",
+        createdAt: m.createdAt ? new Date(m.createdAt) : null,
+        recipientUsername: m.recipientUsername || undefined,
+        senderUsername: m.senderUsername || undefined,
+      }))
 
-        const guests = normalized.filter(m => !m.conversationId)
-        const threaded = normalized.filter(m => Boolean(m.conversationId))
+      const guests = normalized.filter(m => !m.conversationId)
+      const threaded = normalized.filter(m => Boolean(m.conversationId))
 
-        const grouped = threaded.reduce((acc: Record<string, Conversation>, msg) => {
-          const key = msg.conversationId!
-          if (!acc[key]) acc[key] = { conversationId: key, messages: [] }
-          acc[key].messages.push(msg)
-          return acc
-        }, {})
+      const grouped: Record<string, Conversation> = {}
+      threaded.forEach(msg => {
+        const key = msg.conversationId!
+        if (!grouped[key]) {
+          let other: string | undefined
+          if (msg.sender === "me" && msg.recipientUsername) other = msg.recipientUsername
+          else if (msg.sender === "anonymous" && msg.senderUsername) other = msg.senderUsername
+          grouped[key] = { conversationId: key, messages: [], otherUsername: other }
+        }
+        grouped[key].messages.push(msg)
+      })
 
-        setGuestMessages(guests)
-        setConversations(Object.values(grouped))
+      setGuestMessages(guests)
+      setConversations(Object.values(grouped))
 
-        if (refresh) toast({ title: "Refreshed" })
-      } catch (err) {
-        const axiosErr = err as AxiosError<ApiResponse>
-        toast({
-          title: "Error",
-          description: axiosErr.response?.data.message || "Failed to load messages",
-          variant: "destructive",
-        })
-      } finally {
-        setIsLoading(false)
-      }
-    },
-    [toast]
-  )
+      if (refresh) toast({ title: "Refreshed" })
+    } catch (err) {
+      const axiosErr = err as AxiosError<ApiResponse>
+      toast({
+        title: "Error",
+        description: axiosErr.response?.data.message || "Failed to load messages",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [toast])
 
   useEffect(() => {
-    if (session?.user) {
+    if (session?.user && !hasFetchedInitial.current) {
+      hasFetchedInitial.current = true
       fetchMessages()
       fetchAcceptMessage()
     }
   }, [session, fetchMessages, fetchAcceptMessage])
 
-  const handleSwitchChange = async () => {
-    const nextStatus = !acceptMessages
+  const handleToggleAccept = async () => {
+    const nextStatus = !acceptMessages;
+    setIsSwitchLoading(true);
     try {
       const res = await axios.post<ApiResponse>("/api/accept-messages", {
         acceptMessages: nextStatus,
-      })
-      setValue("acceptMessages", nextStatus)
-      await updateSession({ isAcceptingMessage: nextStatus })
-      toast({ title: res.data.message })
+      });
+      setAcceptMessages(nextStatus);
+      await updateSession({ isAcceptingMessage: nextStatus });
+      toast({ title: res.data.message });
     } catch (err) {
-      const axiosErr = err as AxiosError<ApiResponse>
+      const axiosErr = err as AxiosError<ApiResponse>;
       toast({
         title: "Error",
         description: axiosErr.response?.data.message || "Update failed",
         variant: "destructive",
-      })
+      });
+    } finally {
+      setIsSwitchLoading(false);
     }
-  }
+  };
 
   if (!session?.user) return <div className="p-8 text-center">Please login</div>
 
@@ -1434,236 +1545,263 @@ export default function Page() {
     toast({ title: "Copied", description: "Profile link copied to clipboard" })
   }
 
+  const visibleConversations = conversations.filter(
+    conv => !conv.otherUsername || !blockedUsers.includes(conv.otherUsername)
+  )
+
   return (
-    <div className="my-8 mx-4 md:mx-8 lg:mx-auto p-6 bg-white rounded-xl w-full max-w-6xl shadow-sm border">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => fetchMessages(true)}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <RefreshCcw className="mr-2 h-4 w-4" />
-          )}
-          Refresh
-        </Button>
-      </div>
-
-      {/* Public Link Card */}
-      <div className="mb-6">
-        <h2 className="text-sm font-medium text-gray-600 mb-2">Your Public Link</h2>
-        <div className="flex items-center gap-2">
-          <input
-            type="text"
-            value={profileUrl}
-            readOnly
-            className="flex-1 p-2 border rounded-md bg-gray-50 text-sm text-gray-700"
-          />
-          <Button onClick={copyToClipboard} size="sm">Copy Link</Button>
-        </div>
-      </div>
-
-      {/* Send Mystery Message Container */}
-      <div className="mb-8 p-5 border rounded-lg bg-slate-50/50">
-        <h2 className="text-lg font-semibold mb-1 flex items-center gap-2">
-          <Send className="w-4 h-4 text-blue-600" />
-          Send Mystery Message
-        </h2>
-        <p className="text-xs text-gray-500 mb-3">
-          Start a private 2-way anonymous chat thread with any registered user.
-        </p>
-        <div className="flex flex-col gap-3">
-          <input
-            type="text"
-            placeholder="Recipient's username"
-            value={targetUsername}
-            onChange={e => setTargetUsername(e.target.value.trim())}
-            className="border p-2.5 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <textarea
-            placeholder="Type your secret message..."
-            value={mysteryContent}
-            onChange={e => setMysteryContent(e.target.value)}
-            rows={2}
-            className="border p-2.5 rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <Button
-            onClick={sendMysteryMessage}
-            disabled={isSendingMystery || !targetUsername || !mysteryContent.trim()}
-            className="self-start px-5"
-            size="sm"
-          >
-            {isSendingMystery ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Sending...
-              </>
-            ) : (
-              "Send Message"
-            )}
+    <div className="min-h-screen bg-slate-50 py-4 px-3 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg border p-4 sm:p-6 lg:p-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
+          <Button variant="outline" size="sm" onClick={() => fetchMessages(true)} disabled={isLoading}>
+            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCcw className="mr-2 h-4 w-4" />}
+            Refresh
           </Button>
         </div>
-      </div>
 
-      {/* Accept Messages Toggle */}
-      <div className="mb-6 flex items-center gap-3">
-        <Switch
-          {...register("acceptMessages")}
-          checked={acceptMessages}
-          onCheckedChange={handleSwitchChange}
-          disabled={isSwitchLoading}
-        />
-        <span className="font-medium text-sm">
-          Accepting public messages: <strong className={acceptMessages ? "text-green-600" : "text-red-500"}>{acceptMessages ? "Yes" : "No"}</strong>
-        </span>
-      </div>
+        {/* Public Link */}
+        <div className="mb-6">
+          <h2 className="text-sm font-medium text-gray-600 mb-2">Your Public Link</h2>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <input
+              type="text"
+              value={profileUrl}
+              readOnly
+              className="flex-1 p-2 border rounded-lg bg-gray-50 text-sm text-gray-700 min-w-0"
+            />
+            <Button onClick={copyToClipboard} size="sm" className="shrink-0">Copy Link</Button>
+          </div>
+        </div>
 
-      <Separator className="my-6" />
+        {/* Send Mystery Message */}
+        <div className="mb-8 p-4 sm:p-5 border rounded-xl bg-slate-50/50">
+          <h2 className="text-base sm:text-lg font-semibold mb-1 flex items-center gap-2">
+            <Send className="w-4 h-4 text-blue-600" />
+            Send Mystery Message
+          </h2>
+          <p className="text-xs text-gray-500 mb-3">Start a private 2-way anonymous chat thread with any registered user.</p>
+          <div className="flex flex-col gap-3">
+            <input
+              type="text"
+              placeholder="Recipient's username"
+              value={targetUsername}
+              onChange={e => setTargetUsername(e.target.value.trim())}
+              className="border p-2.5 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+            />
+            <textarea
+              placeholder="Type your secret message..."
+              value={mysteryContent}
+              onChange={e => setMysteryContent(e.target.value)}
+              rows={2}
+              className="border p-2.5 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+            />
+            <Button
+              onClick={sendMysteryMessage}
+              disabled={isSendingMystery || !targetUsername || !mysteryContent.trim()}
+              className="self-start px-5"
+              size="sm"
+            >
+              {isSendingMystery ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...</> : "Send Message"}
+            </Button>
+          </div>
+        </div>
 
-      {/* --- TABBED SECTION --- */}
-      <Tabs defaultValue="guest" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6">
-          <TabsTrigger value="guest" className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4" />
-            Guest Messages
-            <span className="ml-1 px-2 py-0.5 text-xs bg-gray-200 text-gray-800 rounded-full font-bold">
-              {guestMessages.length}
-            </span>
-          </TabsTrigger>
+        {/* Accept Messages Toggle Button */}
+        <div className="mb-6 flex items-center gap-3 flex-wrap">
+          <button
+            onClick={handleToggleAccept}
+            disabled={isSwitchLoading}
+            className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors ${
+              acceptMessages
+                ? 'bg-green-100 text-green-700 border border-green-300 hover:bg-green-200'
+                : 'bg-red-100 text-red-700 border border-red-300 hover:bg-red-200'
+            }`}
+          >
+            {acceptMessages ? (
+              <>
+                <Check className="w-4 h-4" /> Accepting: ON
+              </>
+            ) : (
+              <>
+                <XCircle className="w-4 h-4" /> Accepting: OFF
+              </>
+            )}
+          </button>
+          <span className="text-sm text-gray-500">
+            Toggle to allow public messages
+          </span>
+        </div>
 
-          <TabsTrigger value="chats" className="flex items-center gap-2">
-            <MessagesSquare className="w-4 h-4 text-blue-600" />
-            2-Way Anonymous Chats
-            <span className="ml-1 px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full font-bold">
-              {conversations.length}
-            </span>
-          </TabsTrigger>
-        </TabsList>
-
-        {/* TAB 1: ONE-WAY GUEST MESSAGES */}
-        <TabsContent value="guest">
-          {guestMessages.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {guestMessages.map(msg => (
-                <MessageCard
-                  key={msg._id}
-                  message={msg}
-                  onMessageDelete={handleDeleteMessage}
-                />
+        {/* Blocked Users */}
+        {blockedUsers.length > 0 && (
+          <div className="mb-6 border rounded-xl p-4 bg-red-50">
+            <h3 className="font-semibold mb-2 text-sm sm:text-base">Blocked Users</h3>
+            <div className="flex flex-wrap gap-2">
+              {blockedUsers.map(u => (
+                <span key={u} className="bg-white border rounded-full px-3 py-1 text-sm flex items-center gap-2">
+                  @{u}
+                  <button onClick={() => handleUnblock(u)} className="text-red-500 hover:text-red-700">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
               ))}
             </div>
-          ) : (
-            <div className="text-center py-12 border border-dashed rounded-lg bg-gray-50">
-              <MessageSquare className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm font-medium text-gray-600">No public guest messages yet.</p>
-              <p className="text-xs text-gray-400 mt-1">Share your link to start receiving anonymous messages.</p>
-            </div>
-          )}
-        </TabsContent>
+          </div>
+        )}
 
-        {/* TAB 2: WHATSAPP-STYLE TWO-WAY ANONYMOUS CHATS */}
-        <TabsContent value="chats">
-          {conversations.length > 0 ? (
-            <div className="space-y-6">
-              {conversations.map(conv => (
-                <div
-                  key={conv.conversationId}
-                  className="border rounded-xl bg-slate-50/50 shadow-sm overflow-hidden"
-                >
-                  {/* WhatsApp-Style Chat Header */}
-                  <div className="bg-slate-100 px-4 py-3 border-b flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                      <UserCircle2 className="w-8 h-8 text-blue-600" />
-                      <div>
-                        <h3 className="font-semibold text-sm text-gray-800">
-                          Anonymous Conversation
-                        </h3>
-                        <p className="text-xs text-gray-500 font-mono">
-                          ID: #{conv.conversationId.slice(-8)}
-                        </p>
+        <Separator className="my-6" />
+
+        {/* Tabs */}
+        <Tabs defaultValue="guest" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="guest" className="flex items-center justify-center gap-2 text-xs sm:text-sm">
+              <MessageSquare className="w-4 h-4" /> Guest Messages
+              <span className="ml-1 px-2 py-0.5 text-xs bg-gray-200 text-gray-800 rounded-full font-bold">
+                {guestMessages.length}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger value="chats" className="flex items-center justify-center gap-2 text-xs sm:text-sm">
+              <MessagesSquare className="w-4 h-4 text-blue-600" /> 2-Way Chats
+              <span className="ml-1 px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full font-bold">
+                {visibleConversations.length}
+              </span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="guest">
+            {guestMessages.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {guestMessages.map(msg => (
+                  <MessageCard
+                    key={msg._id}
+                    message={msg}
+                    onMessageDelete={handleDeleteSingleMessage}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 border border-dashed rounded-lg bg-gray-50">
+                <MessageSquare className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-sm font-medium text-gray-600">No public guest messages yet.</p>
+                <p className="text-xs text-gray-400 mt-1">Share your link to start receiving anonymous messages.</p>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="chats">
+            {visibleConversations.length > 0 ? (
+              <div className="space-y-6">
+                {visibleConversations.map(conv => (
+                  <div key={conv.conversationId} className="border rounded-xl bg-slate-50/50 shadow-sm overflow-hidden">
+                    {/* Chat Header */}
+                    <div className="bg-slate-100 px-4 py-3 border-b flex flex-col sm:flex-row justify-between gap-2 sm:items-center">
+                      <div className="flex items-center gap-3">
+                        <UserCircle2 className="w-8 h-8 text-blue-600 shrink-0" />
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-sm text-gray-800 truncate">
+                            {conv.otherUsername ? `Chat with @${conv.otherUsername}` : "Anonymous Conversation"}
+                          </h3>
+                          {conv.otherUsername && <OnlineStatusIndicator username={conv.otherUsername} />}
+                          <p className="text-xs text-gray-500 font-mono">ID: #{conv.conversationId.slice(-8)}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-1 sm:gap-2 flex-wrap">
+                        {conv.otherUsername && (
+                          <>
+                            <Button size="sm" variant="ghost" className="text-xs text-red-500 hover:text-red-700"
+                              onClick={() => handleBlock(conv.otherUsername!)}>
+                              <Ban className="w-4 h-4 mr-1" /> Block
+                            </Button>
+                            <Button size="sm" variant="ghost" className="text-xs text-red-500 hover:text-red-700"
+                              onClick={() => handleDeleteConversation(conv.conversationId)}>
+                              <Trash2 className="w-4 h-4 mr-1" /> Delete
+                            </Button>
+                          </>
+                        )}
+                        <Button size="sm" variant="ghost" className="text-xs text-blue-600 hover:text-blue-700"
+                          onClick={() => handleReplyClick(conv.conversationId)}>
+                          {activeConv === conv.conversationId ? "Hide Chat Box" : "Open Chat Box"}
+                        </Button>
                       </div>
                     </div>
 
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-xs text-blue-600 hover:text-blue-700"
-                      onClick={() => handleReplyClick(conv.conversationId)}
-                    >
-                      {activeConv === conv.conversationId ? "Hide Chat Box" : "Open Chat Box"}
-                    </Button>
-                  </div>
-
-                  {/* Message Bubble Feed */}
-                  <div className="p-4 space-y-3 max-h-[400px] overflow-y-auto">
-                    {conv.messages.map(msg => {
-                      const isMe = msg.sender === session?.user?.username || msg.sender === "me"
-                      return (
-                        <div
-                          key={msg._id}
-                          className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}
-                        >
-                          <div
-                            className={`p-3 rounded-2xl max-w-[80%] text-sm shadow-sm ${
-                              isMe
-                                ? "bg-blue-600 text-white rounded-br-none"
-                                : "bg-white text-gray-800 border rounded-bl-none"
-                            }`}
-                          >
-                            <p>{msg.content}</p>
-                            <span
-                              className={`block text-[10px] mt-1 text-right ${
-                                isMe ? "text-blue-200" : "text-gray-400"
-                              }`}
+                    {/* Messages */}
+                    <div className="p-4 space-y-3 max-h-[400px] overflow-y-auto">
+                      {conv.messages.map(msg => {
+                        const isMe = msg.sender === session?.user?.username || msg.sender === "me"
+                        return (
+                          <div key={msg._id} className={`flex flex-col ${isMe ? "items-end" : "items-start"} relative group`}>
+                            <div className={`p-3 rounded-2xl max-w-[85%] sm:max-w-[70%] text-sm shadow-sm ${
+                              isMe ? "bg-blue-600 text-white rounded-br-none" : "bg-white text-gray-800 border rounded-bl-none"
+                            }`}>
+                              <p className="break-words">{msg.content}</p>
+                              <span className={`block text-[10px] mt-1 text-right ${isMe ? "text-blue-200" : "text-gray-400"}`}>
+                                {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Just now"}
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => handleDeleteSingleMessage(msg._id!)}
+                              className="absolute top-1 right-1 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                              title="Delete message"
                             >
-                              {msg.createdAt
-                                ? new Date(msg.createdAt).toLocaleTimeString([], {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })
-                                : "Just now"}
-                            </span>
+                              <Trash2 className="w-3 h-3" />
+                            </button>
                           </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-
-                  {/* Input Footer */}
-                  {activeConv === conv.conversationId && (
-                    <div className="p-3 bg-white border-t flex gap-2">
-                      <input
-                        value={replyText}
-                        onChange={e => setReplyText(e.target.value)}
-                        placeholder="Type an anonymous reply..."
-                        onKeyDown={e => e.key === "Enter" && sendReply(conv.conversationId)}
-                        className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      <Button
-                        onClick={() => sendReply(conv.conversationId)}
-                        disabled={!replyText.trim()}
-                        size="sm"
-                      >
-                        Send
-                      </Button>
+                        )
+                      })}
                     </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 border border-dashed rounded-lg bg-gray-50">
-              <MessagesSquare className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm font-medium text-gray-600">No active 2-way anonymous chats.</p>
-              <p className="text-xs text-gray-400 mt-1">Send a mystery message above to start a thread.</p>
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+
+                    {/* Reply Input */}
+                    {activeConv === conv.conversationId && (
+                      <div className="p-3 bg-white border-t flex gap-2">
+                        <input
+                          value={replyText}
+                          onChange={e => setReplyText(e.target.value)}
+                          placeholder="Type your reply..."
+                          onKeyDown={e => e.key === "Enter" && sendReply(conv.conversationId, conv.otherUsername)}
+                          className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0"
+                        />
+                        <Button onClick={() => sendReply(conv.conversationId, conv.otherUsername)} disabled={!replyText.trim()} size="sm">
+                          Send
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 border border-dashed rounded-lg bg-gray-50">
+                <MessagesSquare className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-sm font-medium text-gray-600">No active 2-way anonymous chats.</p>
+                <p className="text-xs text-gray-400 mt-1">Send a mystery message above to start a thread.</p>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+
+        {/* Delete Account */}
+        <div className="mt-8 border-t pt-4 flex justify-end">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm" className="flex items-center gap-2">
+                <Trash2 className="w-4 h-4" /> Delete Account
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+                <AlertDialogDescription>This will permanently remove your profile and all messages.</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </div>
     </div>
   )
 }
@@ -2093,7 +2231,7 @@ import { authOptions } from "../auth/[...nextauth]/options";
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User";
 import { User } from "next-auth";
-import { redis } from "@/lib/redis"; 
+import { redis } from "@/lib/redis";
 
 export async function POST(request: Request) {
   await dbConnect();
@@ -2127,11 +2265,12 @@ export async function POST(request: Request) {
           success: false,
           message: "Failed to update user status to accept messages",
         },
-        { status: 404 } // 👈 Fixed status code (was 401)
+        { status: 404 }
       );
     }
 
-    // ⚡ CRITICAL FIX: Instantly sync Redis RAM cache so /u/[username] and /api/send-message stay in sync
+    // 🔥 Update Redis cache
+    await redis.del(`user:${updatedUser.username}:accepting`);
     await redis.set(
       `user:${updatedUser.username}:accepting`,
       acceptMessages ? "true" : "false"
@@ -2141,7 +2280,8 @@ export async function POST(request: Request) {
       {
         success: true,
         message: "Message acceptance status updated successfully",
-        isAcceptingMessage: updatedUser.isAcceptingMessage, // Fixed field name
+        isAcceptingMessages: updatedUser.isAcceptingMessage, // ✅ plural
+        isAcceptingMessage: updatedUser.isAcceptingMessage,  // ✅ singular fallback
       },
       { status: 200 }
     );
@@ -2189,7 +2329,8 @@ export async function GET(request: Request) {
       );
     }
 
-    // ⚡ CRITICAL FIX: Refresh Redis on GET request to keep cache primed
+    // Refresh Redis cache on GET
+    await redis.del(`user:${foundUser.username}:accepting`);
     await redis.set(
       `user:${foundUser.username}:accepting`,
       foundUser.isAcceptingMessage ? "true" : "false"
@@ -2198,7 +2339,8 @@ export async function GET(request: Request) {
     return Response.json(
       {
         success: true,
-        isAcceptingMessage: foundUser.isAcceptingMessage, // Fixed key name (removed trailing 's')
+        isAcceptingMessages: foundUser.isAcceptingMessage, // ✅ plural
+        isAcceptingMessage: foundUser.isAcceptingMessage,  // ✅ singular fallback
       },
       { status: 200 }
     );
@@ -2313,17 +2455,16 @@ import UserModel from "@/model/User";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
 
+// POST: block or unblock a user
 export async function POST(req: Request) {
   try {
     await dbConnect();
     const session = await getServerSession(authOptions);
-
     if (!session?.user?.username) {
       return Response.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    const { targetUsername, action } = await req.json(); // action: "block" | "unblock"
-
+    const { targetUsername, action } = await req.json();
     if (!targetUsername || !["block", "unblock"].includes(action)) {
       return Response.json({ success: false, message: "Invalid payload" }, { status: 400 });
     }
@@ -2342,6 +2483,24 @@ export async function POST(req: Request) {
       success: true,
       message: `User ${action === "block" ? "blocked" : "unblocked"} successfully`,
     });
+  } catch (error) {
+    return Response.json({ success: false, message: "Server error" }, { status: 500 });
+  }
+}
+
+// GET: list all blocked users
+export async function GET() {
+  try {
+    await dbConnect();
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.username) {
+      return Response.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = await UserModel.findOne({ username: session.user.username }).select("blockedUsers");
+    if (!user) return Response.json({ success: false, message: "User not found" }, { status: 404 });
+
+    return Response.json({ success: true, blockedUsers: user.blockedUsers || [] });
   } catch (error) {
     return Response.json({ success: false, message: "Server error" }, { status: 500 });
   }
@@ -2410,6 +2569,42 @@ export async function GET(request: Request) {
             },
             { status: 500 })
     }
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\api\delete-conversation\route.ts
+==========================================================================================
+
+import dbConnect from "@/lib/dbConnect";
+import UserModel from "@/model/User";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/options";
+
+export async function DELETE(req: Request) {
+  try {
+    await dbConnect();
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.username) {
+      return Response.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const conversationId = searchParams.get("conversationId");
+    if (!conversationId) {
+      return Response.json({ success: false, message: "conversationId required" }, { status: 400 });
+    }
+
+    // ✅ Remove all messages with this conversationId from the CURRENT USER ONLY
+    await UserModel.updateOne(
+      { username: session.user.username },
+      { $pull: { messages: { conversationId } } }
+    );
+
+    return Response.json({ success: true, message: "Conversation deleted for you" });
+  } catch (error) {
+    console.error("Delete conversation error:", error);
+    return Response.json({ success: false, message: "Server error" }, { status: 500 });
+  }
 }
 
 ==========================================================================================
@@ -2560,72 +2755,69 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   try {
     await dbConnect();
-
     const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
-      return Response.json({ success: false, message: "Unauthorized" }, { status: 401 });
-    }
+    if (!session?.user) return Response.json({ success: false }, { status: 401 });
 
-    const { username: recipientUsername, content, conversationId } = await req.json();
-
-    if (!recipientUsername || !content || !conversationId) {
+    const { content, conversationId, recipientUsername: optionalRecipient } = await req.json();
+    if (!content || !conversationId) {
       return Response.json({ success: false, message: "Missing fields" }, { status: 400 });
     }
 
-    const recipient = await UserModel.findOne({ username: recipientUsername });
-    if (!recipient) {
-      return Response.json({ success: false, message: "User not found" }, { status: 404 });
+    const currentUser = await UserModel.findOne({ username: session.user.username });
+    if (!currentUser) return Response.json({ success: false }, { status: 404 });
+
+    // 1) Try the optional recipientUsername provided by the client
+    let otherUsername = optionalRecipient;
+
+    // 2) Fallback: extract from our messages
+    if (!otherUsername) {
+      const ourMessages = currentUser.messages.filter(
+        (m: any) => m.conversationId === conversationId
+      );
+      if (ourMessages.length === 0) {
+        return Response.json({ success: false, message: "Conversation not found" }, { status: 404 });
+      }
+      for (const msg of ourMessages) {
+        if (msg.sender === "me" && msg.recipientUsername) {
+          otherUsername = msg.recipientUsername;
+          break;
+        }
+        if (msg.sender === "anonymous" && msg.senderUsername) {
+          otherUsername = msg.senderUsername;
+          break;
+        }
+      }
     }
 
-    // Find all messages in this conversation
-    const convMsgs = recipient.messages.filter((m: any) => m.conversationId === conversationId);
-
-    if (convMsgs.length === 0) {
-      return Response.json({ success: false, message: "Conversation not found" }, { status: 404 });
-    }
-
-    // Get the FIRST message in the conversation (oldest one)
-    // Assuming messages are appended in chronological order
-    const firstMessage = convMsgs[0];
-
-    // Block ONLY if the conversation STARTED with true anonymous
-    const isTrueAnonymousConversation = firstMessage.sender === "anonymous";
-
-    if (isTrueAnonymousConversation) {
+    if (!otherUsername) {
       return Response.json(
-        { success: false, message: "Cannot reply to anonymous messages" },
-        { status: 403 }
+        { success: false, message: "Cannot determine who to reply to" },
+        { status: 400 }
       );
     }
 
-    // Allowed reply (mystery conversation)
+    const recipient = await UserModel.findOne({ username: otherUsername });
+    if (!recipient) return Response.json({ success: false, message: "Recipient not found" }, { status: 404 });
 
-    // Message for recipient (always anonymous)
-    const replyForRecipient = {
+    // Push to recipient
+    recipient.messages.push({
       content,
       createdAt: new Date(),
       conversationId,
-      sender: "anonymous"
-    };
+      sender: "anonymous",
+      senderUsername: session.user.username,
+    });
 
-    // Message for current user (outgoing reply)
-    const replyForCurrentUser = {
+    // Push to current user
+    currentUser.messages.push({
       content,
       createdAt: new Date(),
       conversationId,
-      sender: "me"
-    };
+      sender: "me",
+      recipientUsername: otherUsername,
+    });
 
-    // Save to recipient
-    recipient.messages.push(replyForRecipient);
-    await recipient.save();
-
-    // Save to current replier (outgoing)
-    const currentUser = await UserModel.findOne({ username: session.user.username });
-    if (currentUser) {
-      currentUser.messages.push(replyForCurrentUser);
-      await currentUser.save();
-    }
+    await Promise.all([recipient.save(), currentUser.save()]);
 
     return Response.json({ success: true, message: "Reply sent" });
   } catch (error) {
@@ -2710,6 +2902,8 @@ import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
+import { isUserAcceptingMessages } from "@/lib/redisHelpers";
+import { redis } from "@/lib/redis";
 
 export async function POST(req: Request) {
   try {
@@ -2718,35 +2912,76 @@ export async function POST(req: Request) {
     if (!session?.user) return Response.json({ success: false }, { status: 401 });
 
     const { recipientUsername, content } = await req.json();
-    const conversationId = Date.now().toString();
+
+    if (recipientUsername === session.user.username) {
+      return Response.json(
+        { success: false, message: "You cannot send a message to yourself" },
+        { status: 400 }
+      );
+    }
+
+    const isAccepting = await isUserAcceptingMessages(recipientUsername);
+    if (!isAccepting) {
+      return Response.json(
+        { success: false, message: "User is not accepting messages" },
+        { status: 403 }
+      );
+    }
 
     const recipient = await UserModel.findOne({ username: recipientUsername });
     if (!recipient) return Response.json({ success: false, message: "User not found" }, { status: 404 });
+    if (recipient.blockedUsers?.includes(session.user.username)) {
+      return Response.json(
+        { success: false, message: "You are blocked by this user" },
+        { status: 403 }
+      );
+    }
 
-    // To recipient: always anonymous
+    const senderUser = await UserModel.findOne({ username: session.user.username });
+    const existingConv = senderUser?.messages.find(
+      (m: any) => m.conversationId && m.recipientUsername === recipientUsername
+    );
+    const conversationId = existingConv ? existingConv.conversationId : Date.now().toString();
+
     recipient.messages.push({
       content,
       createdAt: new Date(),
       conversationId,
-      sender: "anonymous"
+      sender: "anonymous",
+      senderUsername: session.user.username,
     });
-    await recipient.save();
 
-    // To sender: "me"
-    const senderUser = await UserModel.findOne({ username: session.user.username });
-    if (senderUser) {
-      senderUser.messages.push({
+    senderUser!.messages.push({
+      content,
+      createdAt: new Date(),
+      conversationId,
+      sender: "me",
+      recipientUsername,
+    });
+
+    await Promise.all([recipient.save(), senderUser!.save()]);
+    await redis.incr(`unread:${recipientUsername}`);
+
+    console.log(`[send-mystery] recipient: ${recipientUsername}`);
+    console.log(`[send-mystery] global.io exists: ${!!global.io}`);
+    if (global.io) {
+      global.io.to(`user:${recipientUsername}`).emit("newMessage", {
+        _id: recipient.messages[recipient.messages.length - 1]._id?.toString(),
         content,
         createdAt: new Date(),
         conversationId,
-        sender: "me"
+        sender: "anonymous",
+        senderUsername: session.user.username,
       });
-      await senderUser.save();
+      console.log(`[send-mystery] emitted to user:${recipientUsername}`);
+    } else {
+      console.error("[send-mystery] global.io is not set!");
     }
 
     return Response.json({ success: true, conversationId });
   } catch (e) {
-    return Response.json({ success: false }, { status: 500 });
+    console.error("send-mystery error:", e);
+    return Response.json({ success: false, message: "Server error" }, { status: 500 });
   }
 }
 
@@ -2984,6 +3219,71 @@ Example format:
 
 
 ==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\api\test-email\route.ts
+==========================================================================================
+
+import { gmailTransporter } from "@/lib/nodemailer";
+
+export async function GET() {
+  try {
+    const info = await gmailTransporter.sendMail({
+      from: `"Test" <${process.env.SMTP_USER}>`,
+      to: "krishnajdhanresha@gmail.com", // ← put your email here
+      subject: "Test Email from Mstry Message",
+      text: "If you see this, SMTP works!",
+    });
+    return Response.json({ success: true, message: "Test email sent", info });
+  } catch (error: any) {
+    console.error("Test email error:", error);
+    return Response.json({ success: false, message: error.message }, { status: 500 });
+  }
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\api\user\delete\route.ts
+==========================================================================================
+
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/options";
+import dbConnect from "@/lib/dbConnect";
+import UserModel from "@/model/User";
+
+export async function DELETE() {
+  await dbConnect();
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return Response.json({ success: false }, { status: 401 });
+
+  await UserModel.deleteOne({ username: session.user.username });
+  return Response.json({ success: true });
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\api\user\status\route.ts
+==========================================================================================
+
+import { NextRequest } from 'next/server';
+import { redis } from '@/lib/redis';
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const username = searchParams.get('username');
+  if (!username) {
+    return Response.json({ error: 'username required' }, { status: 400 });
+  }
+
+  try {
+    const isOnline = await redis.sismember('online_users', username);
+    const lastSeen = await redis.get(`lastseen:${username}`);
+    return Response.json({
+      online: isOnline === 1,
+      lastSeen: lastSeen ? parseInt(lastSeen, 10) : null,
+    });
+  } catch (error) {
+    return Response.json({ online: false, lastSeen: null });
+  }
+}
+
+==========================================================================================
 FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\api\verify-code\route.ts
 ==========================================================================================
 
@@ -3058,7 +3358,9 @@ FILE: c:\Users\krish\Desktop\next\mstrymessage\src\app\u\[username]\page.tsx
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSocket } from "@/hooks/useSocket";
+import { Circle } from "lucide-react";
 
 type Props = {
   params: {
@@ -3068,100 +3370,76 @@ type Props = {
 
 export default function Page({ params }: Props) {
   const { username } = params;
-
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [onlineStatus, setOnlineStatus] = useState<{ online: boolean; lastSeen: number | null }>({ online: false, lastSeen: null });
+  const socket = useSocket();
 
-  // 🔥 Send message
+  useEffect(() => {
+    if (!socket) return;
+
+    const fetchInitial = async () => {
+      const res = await fetch(`/api/user/status?username=${encodeURIComponent(username)}`);
+      if (res.ok) setOnlineStatus(await res.json());
+    };
+    fetchInitial();
+
+    const handleStatusChange = (data: any) => {
+      if (data.username === username) {
+        setOnlineStatus({ online: data.status === 'online', lastSeen: data.lastSeen });
+      }
+    };
+    socket.on('user-status-changed', handleStatusChange);
+    return () => { socket.off('user-status-changed', handleStatusChange); };
+  }, [socket, username]);
+
   const handleSend = async () => {
     if (!message) return;
-
     setLoading(true);
-
     try {
       const res = await fetch("/api/send-message", {
         method: "POST",
-        body: JSON.stringify({
-          username,
-          content: message,
-        }),
+        body: JSON.stringify({ username, content: message }),
       });
-
       const data = await res.json();
-
       if (data.success) {
         alert("Message sent");
         setMessage("");
-      } else {
-        alert(data.message);
-      }
+      } else alert(data.message);
     } catch (err) {
-      console.error(err);
       alert("Something went wrong");
     }
-
     setLoading(false);
   };
 
-  // 🤖 Get AI suggestions
   const handleSuggest = async () => {
     try {
-      const res = await fetch("/api/suggest-messages", {
-        method: "POST",
-      });
-
+      const res = await fetch("/api/suggest-messages", { method: "POST" });
       const data = await res.json();
-
-      if (data.success) {
-        const msgs = data.data.split("||");
-        setSuggestions(msgs);
-      }
-    } catch (err) {
-      console.error(err);
-    }
+      if (data.success) setSuggestions(data.data.split("||"));
+    } catch (err) {}
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6">
-      
-      <h1 className="text-3xl font-bold mb-4">
-        Send Anonymous Message to @{username}
-      </h1>
+      {/* Online status */}
 
-      {/* Input */}
-      <textarea
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
+      <h1 className="text-3xl font-bold mb-4">Send Anonymous Message to @{username}</h1>
+
+      <textarea value={message} onChange={(e) => setMessage(e.target.value)}
         placeholder="Write your anonymous message..."
-        className="w-full max-w-xl p-3 border rounded-lg mb-4"
-      />
+        className="w-full max-w-xl p-3 border rounded-lg mb-4" />
 
-      {/* Send button */}
-      <button
-        onClick={handleSend}
-        disabled={loading}
-        className="bg-black text-white px-6 py-2 rounded-lg mb-4"
-      >
+      <button onClick={handleSend} disabled={loading}
+        className="bg-black text-white px-6 py-2 rounded-lg mb-4">
         {loading ? "Sending..." : "Send It"}
       </button>
 
-      {/* Suggest button */}
-      <button
-        onClick={handleSuggest}
-        className="bg-gray-300 px-4 py-2 rounded-lg mb-4"
-      >
-        Suggest Messages
-      </button>
-
-      {/* Suggestions */}
       <div className="w-full max-w-xl">
         {suggestions.map((msg, index) => (
-          <div
-            key={index}
-            onClick={() => setMessage(msg)}
-            className="border p-2 rounded mb-2 cursor-pointer hover:bg-gray-100"
-          >
+          <div key={index} onClick={() => setMessage(msg)}
+            className="border p-2 rounded mb-2 cursor-pointer hover:bg-gray-100">
             {msg}
           </div>
         ))}
@@ -4475,10 +4753,10 @@ export function Toaster() {
 FILE: c:\Users\krish\Desktop\next\mstrymessage\src\helpers\sendVerificationEmail.tsx
 ==========================================================================================
 
-import nodemailer from "nodemailer"
-import { render } from "@react-email/render"
-import VerificationEmail from "../../emails/VerificationEmail"
-import { ApiResponse } from "@/types/ApiResponse"
+import { render } from "@react-email/render";
+import VerificationEmail from "../../emails/VerificationEmail";
+import { ApiResponse } from "@/types/ApiResponse";
+import { sendEmail } from "@/lib/brevo";
 
 export async function sendVerificationEmail(
   email: string,
@@ -4486,30 +4764,20 @@ export async function sendVerificationEmail(
   verifyCode: string
 ): Promise<ApiResponse> {
   try {
-    
     const emailHtml: string = await render(
       <VerificationEmail username={username} otp={verifyCode} />
-    )
+    );
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
-      },
-    })
-
-    await transporter.sendMail({
-      from: `"Mystery Message" <${process.env.GMAIL_USER}>`,
+    await sendEmail({
       to: email,
       subject: "Mystery Message | Verification code",
-      html: emailHtml, 
-    })
+      html: emailHtml,
+    });
 
-    return { success: true, message: "Verification email sent successfully" }
+    return { success: true, message: "Verification email sent successfully" };
   } catch (error) {
-    console.error("Email error:", error)
-    return { success: false, message: "Failed to send verification email" }
+    console.error("Email error:", error);
+    return { success: false, message: "Failed to send verification email" };
   }
 }
 
@@ -4714,48 +4982,158 @@ export { useToast, toast }
 
 
 ==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\hooks\useOnlineStatus.ts
+==========================================================================================
+
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useSocket } from './useSocket';
+
+type UserStatus = {
+  online: boolean;
+  lastSeen: number | null;
+};
+
+export function useOnlineStatus(username: string | undefined): UserStatus {
+  const socket = useSocket();
+  const [status, setStatus] = useState<UserStatus>({ online: false, lastSeen: null });
+
+  useEffect(() => {
+    if (!username) return;
+
+    const fetchStatus = async () => {
+      try {
+        const res = await fetch(`/api/user/status?username=${encodeURIComponent(username)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setStatus({ online: data.online, lastSeen: data.lastSeen });
+        }
+      } catch (e) {}
+    };
+
+    fetchStatus();
+
+    // Polling fallback every 10 seconds
+    const interval = setInterval(fetchStatus, 10000);
+
+    if (socket) {
+      const handleStatusChange = (data: { username: string; status: string; lastSeen: number | null }) => {
+        if (data.username === username) {
+          setStatus({
+            online: data.status === 'online',
+            lastSeen: data.lastSeen,
+          });
+        }
+      };
+      socket.on('user-status-changed', handleStatusChange);
+
+      return () => {
+        clearInterval(interval);
+        socket.off('user-status-changed', handleStatusChange);
+      };
+    }
+
+    return () => clearInterval(interval);
+  }, [username, socket]);
+
+  return status;
+}
+
+==========================================================================================
 FILE: c:\Users\krish\Desktop\next\mstrymessage\src\hooks\useSocket.ts
 ==========================================================================================
 
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useSession } from 'next-auth/react';
 
+let globalSocket: Socket | null = null;
+
 export function useSocket() {
   const { data: session } = useSession();
-  const socketRef = useRef<Socket | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(globalSocket);
 
   useEffect(() => {
-    if (!session?.user?.username || socketRef.current) return;
+    if (!session?.user?.username) return;
 
-    // Connect to standalone Socket.io server
-    const socket = io('http://localhost:3001', {
-      path: '/socket.io',
-      autoConnect: true,
-      reconnection: true,
-      reconnectionAttempts: 5,
+    if (!globalSocket) {
+      const newSocket = io({
+        path: '/socket.io',
+        autoConnect: true,
+        reconnection: true,
+        reconnectionAttempts: 5,
+      });
+      globalSocket = newSocket;
+      setSocket(newSocket);
+    } else {
+      setSocket(globalSocket);
+    }
+
+    const currentSocket = globalSocket;
+
+    currentSocket.on('connect', () => {
+      console.log('✅ Socket connected, emitting join-room');
+      // Explicitly join the user's room
+      currentSocket.emit('join-room', session.user.username);
     });
 
-    socketRef.current = socket;
-
-    socket.on('connect', () => {
-      console.log('✅ Connected to Socket.io server');
-      socket.emit('join-user-room', session.user.username);
-    });
-
-    socket.on('connect_error', (err) => {
-      console.error('Socket connection error:', err.message);
-    });
+    currentSocket.connect();
 
     return () => {
-      socket.disconnect();
-      socketRef.current = null;
+      currentSocket.off('connect');
+      // keep singleton alive
     };
   }, [session?.user?.username]);
 
-  return socketRef.current;
+  return socket;
+}
+
+==========================================================================================
+FILE: c:\Users\krish\Desktop\next\mstrymessage\src\lib\brevo.ts
+==========================================================================================
+
+export async function sendEmail({
+  to,
+  subject,
+  html,
+}: {
+  to: string;
+  subject: string;
+  html: string;
+}) {
+  const apiKey = process.env.BREVO_API_KEY;
+  const fromEmail = process.env.EMAIL_FROM;
+
+  if (!apiKey || !fromEmail) {
+    throw new Error("Missing BREVO_API_KEY or EMAIL_FROM");
+  }
+
+  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "api-key": apiKey,
+    },
+    body: JSON.stringify({
+      sender: {
+        name: "Mystery Message",
+        email: fromEmail,
+      },
+      to: [{ email: to }],
+      subject,
+      htmlContent: html,
+    }),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Brevo API error: ${res.status} ${errorText}`);
+  }
+
+  return { success: true };
 }
 
 ==========================================================================================
@@ -4794,15 +5172,18 @@ export default dbConnect;
 FILE: c:\Users\krish\Desktop\next\mstrymessage\src\lib\nodemailer.ts
 ==========================================================================================
 
-import nodemailer from "nodemailer"
+import nodemailer from "nodemailer";
 
+// Shared transporter using Brevo SMTP
 export const gmailTransporter = nodemailer.createTransport({
-  service: "gmail",
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: false, // false for 587, true for 465
   auth: {
-    user: process.env.GMAIL_USER,        // e.g., yourname@gmail.com
-    pass: process.env.GMAIL_APP_PASSWORD, // 16-character Google App Password
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
-})
+});
 
 ==========================================================================================
 FILE: c:\Users\krish\Desktop\next\mstrymessage\src\lib\queue.ts
@@ -4970,8 +5351,10 @@ export interface Message {
   _id?: string;
   content: string;
   createdAt?: Date;
-  conversationId?: string; // Optional for unidirectional guest messages
+  conversationId?: string;
   sender: string;
+  recipientUsername?: string;   // for sender's copy ("me")
+  senderUsername?: string;      // 🔥 NEW: real sender’s username (for recipient’s anonymous copy)
 }
 
 const MessageSchema: Schema = new Schema({
@@ -4985,12 +5368,20 @@ const MessageSchema: Schema = new Schema({
   },
   conversationId: {
     type: String,
-    required: false, // Optional for direct inbox messages
+    required: false,
   },
   sender: {
-    type: String, // "guest" or sender's username
+    type: String,
     default: "guest",
     required: true,
+  },
+  recipientUsername: {
+    type: String,
+    required: false,
+  },
+  senderUsername: {              // 🔥 NEW
+    type: String,
+    required: false,
   },
 });
 
@@ -5003,6 +5394,7 @@ export interface User extends Document {
   isVerified: boolean;
   isAcceptingMessage: boolean;
   messages: Message[];
+  blockedUsers: string[];
 }
 
 const UserSchema: Schema<User> = new Schema({
@@ -5014,7 +5406,7 @@ const UserSchema: Schema<User> = new Schema({
   },
   email: {
     type: String,
-    required: [true, "Email is required"], // Fixed validation message
+    required: [true, "Email is required"],
     unique: true,
     match: [/.+\@.+\..+/, "Please use a valid email address"],
   },
@@ -5028,7 +5420,7 @@ const UserSchema: Schema<User> = new Schema({
   },
   verifyCodeExpiry: {
     type: Date,
-    required: [true, "Verify code expiry is required"], // Fixed validation message
+    required: [true, "Verify code expiry is required"],
   },
   isVerified: {
     type: Boolean,
@@ -5039,6 +5431,10 @@ const UserSchema: Schema<User> = new Schema({
     default: true,
   },
   messages: [MessageSchema],
+  blockedUsers: {
+    type: [String],
+    default: [],
+  },
 });
 
 const UserModel =
@@ -5138,6 +5534,7 @@ export interface ApiResponse {
   success: boolean;
   message: string;
   isAcceptingMessages?: boolean;
+  isAcceptingMessage?: boolean;
   messages?: Message[];
 }
 
@@ -5171,34 +5568,22 @@ DefaultSession['user']
 FILE: c:\Users\krish\Desktop\next\mstrymessage\src\workers\emailWorker.ts
 ==========================================================================================
 
-import { Worker } from "bullmq"
-import { redisConnection } from "@/lib/redis"
-import nodemailer from "nodemailer"
-import UserModel from "@/model/User"
-import dbConnect from "@/lib/dbConnect"
-
-// Configure Nodemailer specifically for Gmail App Password
-const gmailTransporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-})
+import { Worker } from "bullmq";
+import { redisConnection } from "@/lib/redis";
+import { sendEmail } from "@/lib/brevo";
+import UserModel from "@/model/User";
+import dbConnect from "@/lib/dbConnect";
 
 export const emailWorker = new Worker(
   "email-notification-queue",
   async (job) => {
-    // Ensure MongoDB connection is active inside the worker execution
-    await dbConnect()
+    await dbConnect();
 
-    const { recipientId, unreadCount } = job.data
+    const { recipientId, unreadCount } = job.data;
+    const user = await UserModel.findById(recipientId);
+    if (!user || !user.email) return;
 
-    const user = await UserModel.findById(recipientId)
-    if (!user || !user.email) return
-
-    await gmailTransporter.sendMail({
-      from: `"Anonymous Inbox" <${process.env.GMAIL_USER}>`,
+    await sendEmail({
       to: user.email,
       subject: `📥 You have ${unreadCount} unread anonymous messages!`,
       html: `
@@ -5213,15 +5598,15 @@ export const emailWorker = new Worker(
           </p>
         </div>
       `,
-    })
+    });
 
-    console.log(`[Gmail Worker] Digest sent to ${user.email}`)
+    console.log(`[Brevo API Worker] Digest sent to ${user.email}`);
   },
-  { 
+  {
     connection: redisConnection,
-    concurrency: 5 // Process up to 5 emails concurrently
+    concurrency: 5,
   }
-)
+);
 
 ==========================================================================================
 FILE: c:\Users\krish\Desktop\next\mstrymessage\src\workers\guestExpiryWorker.ts
@@ -5273,22 +5658,17 @@ export const initMessageWorker = () => {
       await dbConnect();
       const { type } = job.data;
 
-      // ─────────────────────────────────────────────────────────────
-      // 1. UNIDIRECTIONAL GUEST MESSAGE PROCESSING
-      // ─────────────────────────────────────────────────────────────
       if (type === "GUEST_MESSAGE") {
         const { recipientUsername, content, createdAt } = job.data;
 
         const user = await UserModel.findOne({ username: recipientUsername }).select("isAcceptingMessage email");
         if (!user) throw new Error(`User ${recipientUsername} not found`);
 
-        // Worker fail-safe guard: stop execution if user closed public messages
         if (!user.isAcceptingMessage) {
           console.log(`[BullMQ] User ${recipientUsername} is not accepting messages. Skipping job.`);
           return;
         }
 
-        // Generate explicit ObjectId for atomic array push (avoids loading entire messages array in memory)
         const messageId = new mongoose.Types.ObjectId();
         const newMessage = {
           _id: messageId,
@@ -5301,17 +5681,17 @@ export const initMessageWorker = () => {
           { $push: { messages: newMessage } }
         );
 
-        // A. SCHEDULE 24-HOUR AUTO-DELETION FOR GUEST MESSAGE
+        // 🔥 FIX: Add a unique jobId to avoid collisions
         await guestExpiryQueue.add(
           "delete-guest-message",
           { recipientUsername, messageId: messageId.toString() },
           {
-            delay: 24 * 60 * 60 * 1000, // 24 Hours in ms
+            delay: 24 * 60 * 60 * 1000,
+            jobId: `expire:${messageId.toString()}`,   // unique per message
             removeOnComplete: true,
           }
         );
 
-        // B. REDIS UNREAD COUNTER & GMAIL NOTIFICATION TRIGGER
         const unreadKey = `unread:${recipientUsername}`;
         const cooldownKey = `email_cooldown:${recipientUsername}`;
 
@@ -5321,10 +5701,7 @@ export const initMessageWorker = () => {
           const isCoolingDown = await redis.get(cooldownKey);
 
           if (!isCoolingDown && user.email) {
-            // Set 1-hour cooldown key in Redis
             await redis.set(cooldownKey, "true", "EX", 3600);
-
-            // Dispatch job to email queue
             await emailQueue.add("send-unread-digest", {
               recipientId: user._id.toString(),
               unreadCount: currentUnread,
@@ -5332,10 +5709,8 @@ export const initMessageWorker = () => {
           }
         }
 
-        // Invalidate message list cache in Redis
         await redis.del(`user:${recipientUsername}:messages`);
 
-        // Emit real-time notification to recipient via Socket.io
         if (global.io) {
           global.io.to(`user:${recipientUsername}`).emit("newMessage", {
             type: "GUEST_MESSAGE",
@@ -5344,9 +5719,6 @@ export const initMessageWorker = () => {
         }
       }
 
-      // ─────────────────────────────────────────────────────────────
-      // 2. BIDIRECTIONAL ANONYMOUS CHAT THREAD PROCESSING
-      // ─────────────────────────────────────────────────────────────
       if (type === "CHAT_THREAD_MESSAGE") {
         const { conversationId, senderUsername, recipientUsername, content, senderAlias } = job.data;
 
