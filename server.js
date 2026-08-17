@@ -5,7 +5,6 @@ import { Server } from 'socket.io';
 import { getToken } from 'next-auth/jwt';
 import { redis } from './src/lib/redis.ts';
 import { initMessageWorker } from './src/workers/messageWorker.ts';
-import { setIO } from './src/lib/socket.ts';   // ✅ new import
 
 // Simple cookie parser
 function parseCookies(cookieHeader) {
@@ -41,7 +40,8 @@ app.prepare().then(() => {
     },
   });
 
-  setIO(io);   // ✅ store io instance
+  // ✅ Store io globally for access in API routes
+  globalThis.__io = io;
 
   // Socket authentication middleware
   io.use(async (socket, next) => {
