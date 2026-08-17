@@ -20,7 +20,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // THIS must run
     const isAccepting = await isUserAcceptingMessages(recipientUsername);
     if (!isAccepting) {
       return Response.json(
@@ -63,6 +62,8 @@ export async function POST(req: Request) {
     await Promise.all([recipient.save(), senderUser!.save()]);
     await redis.incr(`unread:${recipientUsername}`);
 
+    console.log(`[send-mystery] recipient: ${recipientUsername}`);
+    console.log(`[send-mystery] global.io exists: ${!!global.io}`);
     if (global.io) {
       global.io.to(`user:${recipientUsername}`).emit("newMessage", {
         _id: recipient.messages[recipient.messages.length - 1]._id?.toString(),
@@ -72,6 +73,9 @@ export async function POST(req: Request) {
         sender: "anonymous",
         senderUsername: session.user.username,
       });
+      console.log(`[send-mystery] emitted to user:${recipientUsername}`);
+    } else {
+      console.error("[send-mystery] global.io is not set!");
     }
 
     return Response.json({ success: true, conversationId });

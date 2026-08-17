@@ -257,7 +257,6 @@ export default function Page() {
     setIsSwitchLoading(true)
     try {
       const res = await axios.get<ApiResponse>("/api/accept-messages")
-      // ✅ Read both possible field names
       const isAccepting = res.data.isAcceptingMessages ?? res.data.isAcceptingMessage ?? false;
       setAcceptMessages(isAccepting)
     } catch (err) {

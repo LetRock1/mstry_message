@@ -27,9 +27,17 @@ export function useSocket() {
     }
 
     const currentSocket = globalSocket;
+
+    currentSocket.on('connect', () => {
+      console.log('✅ Socket connected, emitting join-room');
+      // Explicitly join the user's room
+      currentSocket.emit('join-room', session.user.username);
+    });
+
     currentSocket.connect();
 
     return () => {
+      currentSocket.off('connect');
       // keep singleton alive
     };
   }, [session?.user?.username]);

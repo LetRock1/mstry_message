@@ -7,7 +7,7 @@ import { getToken } from 'next-auth/jwt';
 import { redisConnection, redis } from './src/lib/redis.ts';
 import { initMessageWorker } from './src/workers/messageWorker.ts';
 
-// Simple cookie parser (no external package needed)
+// Simple cookie parser
 function parseCookies(cookieHeader) {
   const cookies = {};
   if (!cookieHeader) return cookies;
@@ -60,7 +60,7 @@ app.prepare().then(() => {
       const token = await getToken({
         req: {
           headers: socket.handshake.headers,
-          cookies: parsed,   // now a plain object
+          cookies: parsed,
         },
         secret: process.env.NEXTAUTH_SECRET,
       });
@@ -78,19 +78,44 @@ app.prepare().then(() => {
   io.on('connection', async (socket) => {
     const username = socket.data.username;
     console.log(`User connected: ${username}`);
+
+    // Auto join room
     socket.join(`user:${username}`);
 
-    // Online presence
-    await redis.sadd('online_users', username);
-    await redis.set(`lastseen:${username}`, Date.now());
-    io.emit('user-status-changed', { username, status: 'online', lastSeen: null });
+    // Handle explicit join-room event (idempotent)
+    socket.on('join-room', (roomUsername) => {
+      if (roomUsername && typeof roomUsername === 'string') {
+        socket.join(`user:${roomUsername}`);
+        console.log(`User ${username} explicitly joined room user:${roomUsername}`);
+      }
+    });
+
+    // Presence counter to support multiple tabs
+    const presenceKey = `presence:${username}`;
+    const count = await redis.incr(presenceKey);
+    if (count === 1) {
+      await redis.sadd('online_users', username);
+      await redis.set(`lastseen:${username}`, Date.now());
+      io.emit('user-status-changed', {
+        username,
+        status: 'online',
+        lastSeen: null,
+      });
+    }
 
     socket.on('disconnect', async () => {
       console.log(`User disconnected: ${username}`);
-      await redis.srem('online_users', username);
-      const lastSeen = Date.now();
-      await redis.set(`lastseen:${username}`, lastSeen);
-      io.emit('user-status-changed', { username, status: 'offline', lastSeen });
+      const remaining = await redis.decr(presenceKey);
+      if (remaining <= 0) {
+        await redis.srem('online_users', username);
+        const lastSeen = Date.now();
+        await redis.set(`lastseen:${username}`, lastSeen);
+        io.emit('user-status-changed', {
+          username,
+          status: 'offline',
+          lastSeen,
+        });
+      }
     });
   });
 
